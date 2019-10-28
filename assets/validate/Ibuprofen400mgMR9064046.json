@@ -1,0 +1,73 @@
+{
+    "resourceType": "MedicationRequest",
+    "id": "Ibuprofen400mgMR9064046",
+    "subject": {
+        "reference": "Patient/Nameonlyhere",
+        "display": "Name only here"
+    },
+    "status": "completed",
+    "intent": "order",
+    "medicationReference": {
+        "reference": "Medication/Ibuprofen400mg",
+        "display": "Ibuprofen 400 mg every 6 hours 10 tablets"
+    },
+    "authoredOn": "2019-09-06T00:00:00",
+    "requester": [
+        {
+            "reference": "Practitioner/FirstLast",
+            "display": "First Last"
+        }
+    ],
+    "reasonCode": [
+        {
+            "coding": [
+                {
+                    "system": "http://hl7.org/fhir/ValueSet/icd-10",
+                    "code": "ICD10 for Diagnosis 1",
+                    "display": "Diagnosis 1"
+                }
+            ]
+        }
+    ],
+    "dosageInstructions": [
+        {
+            "sequence": 1,
+            "text": "Ibuprofen 400 mg every 6 hours 10 tablets",
+            "timing": {
+                "repeat": {
+                    "frequency": 1,
+                    "period": 6.0,
+                    "periodUnit": "h"
+                }
+            },
+            "route": {
+                "coding": [
+                    {
+                        "system": "http://snomed.info/sct",
+                        "code": "260548002",
+                        "display": "Oral (qualifier value)"
+                    }
+                ]
+            },
+            "doseAndRate": [
+                {
+                    "type": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                                "code": "ordered",
+                                "display": "Ordered"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "doseQuantity": {
+                "value": 1.0,
+                "unit": "TAB",
+                "system": "http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm",
+                "code": "TAB"
+            }
+        }
+    ]
+}
