@@ -15,13 +15,21 @@ def check_compliance(j_data, filename, expand):
     k = Draft6Validator(json.loads(schema))
 
     if k.is_valid(j_data):
-        print(filename[-1], ':', 'Valid')
+        pass
+        # print(filename[-1], ':', 'Valid')
     elif expand:
-        tree = ErrorTree(k.iter_errors(j_data))
-        # print(filename[-1], ':', 'Invalid R4: %s' % sorted(tree.errors))
+        errors = sorted(k.iter_errors(j_data), key=lambda e: e.path)
 
-        for error in sorted(k.iter_errors(j_data), key=str):
-            print(filename[-1], ':', 'Invalid R4: %s' % error.message)
+        for error in errors:
+
+            for suberror in sorted(error.context, key=lambda e: e.schema_path):
+
+                if int(list(suberror.schema_path)[0]) in range(0, 20):
+                    print(list(suberror.schema_path))
+
+                    # print(filename[-1], ':', list(suberror.schema_path), suberror.message)
+
+
     else:
         print(filename[-1], ':', 'Invalid')
 
@@ -34,7 +42,7 @@ def main():
         if sys.argv[-1] == "expand":
             expand = True
 
-    for file in glob.glob("assets/validate/*.json"):
+    for file in glob.iglob("assets/validate/**/*.json", recursive=True):
 
         data = open(file, encoding="utf8").read()
 
