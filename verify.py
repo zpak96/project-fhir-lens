@@ -8,28 +8,35 @@ import json
 import glob
 import sys
 
-schema = open("assets/schemas/R4/fhir.schema.json", encoding="utf8").read()
+r4_schema = open("assets/schemas/R4/fhir.r4.schema.json", encoding="utf8").read()
+r3_schema = open("assets/schemas/STU3/fhir.stu3.schema.json", encoding="utf8").read()
 
 
 def check_compliance(j_data, filename, expand):
-    k = Draft6Validator(json.loads(schema))
+    k = Draft6Validator(json.loads(r4_schema))
 
     if k.is_valid(j_data):
         pass
         # print(filename[-1], ':', 'Valid')
+
     elif expand:
         errors = sorted(k.iter_errors(j_data), key=lambda e: e.path)
 
         for error in errors:
+            # list comprehension of sub-errors
+            result = [list(x.schema_path) for x in sorted(error.context, key=lambda e: e.schema_path)]
+            parse = [y for y in result if 'resourceType' in y]
+            parse_two = [z[0] for z in parse]
+            parse_three = [a[0] for a in enumerate(parse_two) if a[0] != a[1]]
 
+            # parse_four = [b for b in result if b[0] == parse_three[0]]
             for suberror in sorted(error.context, key=lambda e: e.schema_path):
-
-                if int(list(suberror.schema_path)[0]) in range(0, 20):
-                    print(list(suberror.schema_path))
-
-                    # print(filename[-1], ':', list(suberror.schema_path), suberror.message)
-
-
+                if len(parse_three) < 1:
+                    print(filename, ':', 'Invalid resourceType:', j_data['resourceType'], 'was unexpected')
+                    break
+                else:
+                    if int(list(suberror.schema_path)[0]) == parse_three[0]:
+                        print(filename, ':', list(suberror.schema_path), suberror.message)
     else:
         print(filename[-1], ':', 'Invalid')
 
@@ -46,13 +53,14 @@ def main():
 
         data = open(file, encoding="utf8").read()
 
-        filename = str(file).split('/')
+        filename = str(file).split('/')[-1].replace('validate\\', '')
 
         try:
             j_data = json.loads(data)
+            print(filename)
             check_compliance(j_data, filename, expand)
         except Exception as e:
-            print(filename[-1] + ': ' + 'Invalid JSON: %s' % e)
+            print(filename + ': ' + 'Invalid JSON: %s' % e)
 
 
 main()
