@@ -13,11 +13,10 @@ r3_schema = open("assets/schemas/STU3/fhir.stu3.schema.json", encoding="utf8").r
 
 
 def check_compliance(j_data, filename, expand):
-    k = Draft6Validator(json.loads(r4_schema))
+    k = Draft6Validator(json.loads(r3_schema))
 
     if k.is_valid(j_data):
-        pass
-        # print(filename[-1], ':', 'Valid')
+        print(filename + ':', 'Valid')
 
     elif expand:
         errors = sorted(k.iter_errors(j_data), key=lambda e: e.path)
@@ -29,16 +28,15 @@ def check_compliance(j_data, filename, expand):
             parse_two = [z[0] for z in parse]
             parse_three = [a[0] for a in enumerate(parse_two) if a[0] != a[1]]
 
-            # parse_four = [b for b in result if b[0] == parse_three[0]]
             for suberror in sorted(error.context, key=lambda e: e.schema_path):
                 if len(parse_three) < 1:
                     print(filename, ':', 'Invalid resourceType:', j_data['resourceType'], 'was unexpected')
                     break
                 else:
                     if int(list(suberror.schema_path)[0]) == parse_three[0]:
-                        print(filename, ':', list(suberror.schema_path), suberror.message)
+                        print(filename, ':', list(suberror.schema_path)[1:], suberror.message)
     else:
-        print(filename[-1], ':', 'Invalid')
+        print(filename, ':', 'Invalid')
 
 
 def main():
@@ -57,7 +55,6 @@ def main():
 
         try:
             j_data = json.loads(data)
-            print(filename)
             check_compliance(j_data, filename, expand)
         except Exception as e:
             print(filename + ': ' + 'Invalid JSON: %s' % e)
