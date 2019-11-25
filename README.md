@@ -38,7 +38,7 @@ python verify.py
 For invalid files, you can then run verify.py with the "expand" argument to find the errors in each file.
 
 ```
-python verify.py
+python verify.py expand
 ```
 
 ## Built With
