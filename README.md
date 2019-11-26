@@ -10,13 +10,8 @@ solution for making sure that my JSON FHIR resources were in fact valid. With ho
 Please refer to the "requirements.txt" for installing needed packages
 
 Python 3+
-<<<<<<< HEAD
-
-JSONSchema
-=======
 JSONSchema
 
->>>>>>> 70a529045e560bc20590e3e15d7ef90d589f22fc
 ```
 pip3 install -r "requirements.txt"
 ```
