@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 
-
 from jsonschema import Draft6Validator
 import json
 import glob
 import sys
 
-r4_schema = open("bin/schemas/R4/fhir.r4.schema.json", encoding="utf8").read()
-r3_schema = open("bin/schemas/STU3/fhir.stu3.schema.json", encoding="utf8").read()
+r4_schema = open("../bin/schemas/R4/fhir.r4.schema.json", encoding="utf8").read()
+r3_schema = open("../bin/schemas/STU3/fhir.stu3.schema.json", encoding="utf8").read()
 
 
 def check_compliance(j_data, filename, expand):
-    k = Draft6Validator(json.loads(r3_schema))
+    k = Draft6Validator(json.loads(r4_schema))
 
     if k.is_valid(j_data):
         print(filename + ':', 'Valid')
@@ -45,7 +44,7 @@ def main():
         if sys.argv[-1] == "expand":
             expand = True
 
-    for file in glob.iglob("bin/validate/**/*.json", recursive=True):
+    for file in glob.iglob("../bin/validate/**/*.json", recursive=True):
 
         data = open(file, encoding="utf8").read()
 

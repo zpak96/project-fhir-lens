@@ -1,0 +1,58 @@
+{
+    "resourceType": "Condition",
+    "id": "LowerBackPain1184142",
+    "clinicalStatus": {
+        "coding": [
+            {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                "code": "active"
+            }
+        ]
+    },
+    "verificationStatus": {
+        "coding": [
+            {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                "code": "confirmed"
+            }
+        ]
+    },
+    "category": [
+        {
+            "coding": [
+                {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                    "code": "encounter-diagnosis",
+                    "display": "Encounter Diagnosis"
+                },
+                {
+                    "system": "http://snomed.info/sct",
+                    "code": "439401001",
+                    "display": "Diagnosis"
+                }
+            ]
+        }
+    ],
+    "code": {
+        "coding": [
+            {
+                "system": "http://hl7.org/fhir/ValueSet/icd-10",
+                "code": "M54.5",
+                "display": "Lower Back Pain"
+            }
+        ],
+        "text": "Lower Back Pain"
+    },
+    "subject": {
+        "reference": "Patient/SarahThompson",
+        "display": "Sarah Thompson"
+    },
+    "encounter": {
+        "reference": "Encounter/1184142Rehab"
+    },
+    "onsetDateTime": "2019-01-18T00:00:00Z",
+    "asserter": {
+        "reference": "Practitioner/LorileiHaywood",
+        "display": "Lorilei Haywood"
+    }
+}

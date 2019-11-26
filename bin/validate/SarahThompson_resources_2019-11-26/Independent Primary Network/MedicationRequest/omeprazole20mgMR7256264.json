@@ -1,0 +1,73 @@
+{
+    "resourceType": "MedicationRequest",
+    "id": "omeprazole20mgMR7256264",
+    "status": "completed",
+    "intent": "order",
+    "medicationCodeableConcept": {
+        "coding": [
+            {
+                "system": "https://www.accessdata.fda.gov/scripts/cder/ndc/index.cfm",
+                "code": "55910-915"
+            }
+        ]
+    },
+    "medicationReference": {
+        "reference": "Medication/omeprazole20mg",
+        "display": "omeprazole 20 mg one tab every 24 hours 30 tablets"
+    },
+    "subject": {
+        "reference": "Patient/SarahThompson",
+        "display": "Sarah Thompson"
+    },
+    "authoredOn": "2018-07-25T00:00:00Z",
+    "requester": {
+        "reference": "Practitioner/EmmaAdair",
+        "display": "Emma Adair"
+    },
+    "reasonCode": [
+        {
+            "coding": [
+                {
+                    "system": "http://hl7.org/fhir/ValueSet/icd-10",
+                    "code": "K21.9",
+                    "display": "Gastroesphogeal Reflux Disease"
+                }
+            ]
+        }
+    ],
+    "dosageInstruction": [
+        {
+            "sequence": 1,
+            "text": "omeprazole 20 mg one tab every 24 hours 30 tablets",
+            "timing": {
+                "repeat": {
+                    "frequency": 1,
+                    "period": 24.0,
+                    "periodUnit": "h"
+                }
+            },
+            "route": {
+                "coding": [
+                    {
+                        "system": "http://snomed.info/sct",
+                        "code": "260548002",
+                        "display": "Oral (qualifier value)"
+                    }
+                ]
+            },
+            "doseAndRate": [
+                {
+                    "type": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                                "code": "ordered",
+                                "display": "Ordered"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

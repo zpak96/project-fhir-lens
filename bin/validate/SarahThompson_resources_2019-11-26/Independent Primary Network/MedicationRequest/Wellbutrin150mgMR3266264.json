@@ -1,0 +1,73 @@
+{
+    "resourceType": "MedicationRequest",
+    "id": "Wellbutrin150mgMR3266264",
+    "status": "completed",
+    "intent": "order",
+    "medicationCodeableConcept": {
+        "coding": [
+            {
+                "system": "https://www.accessdata.fda.gov/scripts/cder/ndc/index.cfm",
+                "code": "0187-0730"
+            }
+        ]
+    },
+    "medicationReference": {
+        "reference": "Medication/Wellbutrin150mg",
+        "display": "Wellbutrin 150 mg every 12 hours 60 tablets"
+    },
+    "subject": {
+        "reference": "Patient/SarahThompson",
+        "display": "Sarah Thompson"
+    },
+    "authoredOn": "2018-03-26T00:00:00Z",
+    "requester": {
+        "reference": "Practitioner/EmmaAdair",
+        "display": "Emma Adair"
+    },
+    "reasonCode": [
+        {
+            "coding": [
+                {
+                    "system": "http://hl7.org/fhir/ValueSet/icd-10",
+                    "code": "F33.9",
+                    "display": "Depression"
+                }
+            ]
+        }
+    ],
+    "dosageInstruction": [
+        {
+            "sequence": 1,
+            "text": "Wellbutrin 150 mg every 12 hours 60 tablets",
+            "timing": {
+                "repeat": {
+                    "frequency": 1,
+                    "period": 12.0,
+                    "periodUnit": "h"
+                }
+            },
+            "route": {
+                "coding": [
+                    {
+                        "system": "http://snomed.info/sct",
+                        "code": "260548002",
+                        "display": "Oral (qualifier value)"
+                    }
+                ]
+            },
+            "doseAndRate": [
+                {
+                    "type": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                                "code": "ordered",
+                                "display": "Ordered"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

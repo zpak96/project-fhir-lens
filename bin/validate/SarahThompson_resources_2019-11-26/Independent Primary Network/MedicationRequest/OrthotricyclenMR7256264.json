@@ -1,0 +1,73 @@
+{
+    "resourceType": "MedicationRequest",
+    "id": "OrthotricyclenMR7256264",
+    "status": "completed",
+    "intent": "order",
+    "medicationCodeableConcept": {
+        "coding": [
+            {
+                "system": "https://www.accessdata.fda.gov/scripts/cder/ndc/index.cfm",
+                "code": "50458-251"
+            }
+        ]
+    },
+    "medicationReference": {
+        "reference": "Medication/Orthotricyclen",
+        "display": "Orthotricyclen one tablet every 24 hours 30 tablets"
+    },
+    "subject": {
+        "reference": "Patient/SarahThompson",
+        "display": "Sarah Thompson"
+    },
+    "authoredOn": "2018-07-25T00:00:00Z",
+    "requester": {
+        "reference": "Practitioner/EmmaAdair",
+        "display": "Emma Adair"
+    },
+    "reasonCode": [
+        {
+            "coding": [
+                {
+                    "system": "http://hl7.org/fhir/ValueSet/icd-10",
+                    "code": "Z30.011",
+                    "display": "Contraceptive Management"
+                }
+            ]
+        }
+    ],
+    "dosageInstruction": [
+        {
+            "sequence": 1,
+            "text": "Orthotricyclen one tablet every 24 hours 30 tablets",
+            "timing": {
+                "repeat": {
+                    "frequency": 1,
+                    "period": 24.0,
+                    "periodUnit": "h"
+                }
+            },
+            "route": {
+                "coding": [
+                    {
+                        "system": "http://snomed.info/sct",
+                        "code": "260548002",
+                        "display": "Oral (qualifier value)"
+                    }
+                ]
+            },
+            "doseAndRate": [
+                {
+                    "type": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                                "code": "ordered",
+                                "display": "Ordered"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,90 @@
+{
+    "id": "7084142",
+    "resourceType": "Appointment",
+    "status": "fulfilled",
+    "serviceCategory": [
+        {
+            "coding": [
+                {
+                    "system": "http://terminology.hl7.org/CodeSystem/service-category",
+                    "code": "3",
+                    "display": "Alternative and Complementary Therapies"
+                }
+            ]
+        }
+    ],
+    "serviceType": [
+        {
+            "coding": [
+                {
+                    "code": "65",
+                    "display": "Physiotherapy"
+                }
+            ]
+        }
+    ],
+    "specialty": [
+        {
+            "coding": [
+                {
+                    "system": "http://snomed.info/sct",
+                    "code": "416304004",
+                    "display": "Osteopathic Manipulative Medicine"
+                }
+            ]
+        }
+    ],
+    "appointmentType": {
+        "coding": [
+            {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0276",
+                "code": "FOLLOWUP",
+                "display": "A follow up visit from a previous appointment"
+            }
+        ]
+    },
+    "reasonReference": [
+        {
+            "reference": "Condition/LowerBackPain7084142",
+            "display": "Lower Back Pain"
+        }
+    ],
+    "start": "2019-07-08T11:30:00Z",
+    "end": "2019-07-08T12:17:00Z",
+    "minutesDuration": 47,
+    "created": "2019-07-08T00:00:00Z",
+    "participant": [
+        {
+            "actor": {
+                "reference": "Patient/SarahThompson",
+                "display": "Sarah Thompson"
+            },
+            "required": "required",
+            "status": "accepted"
+        },
+        {
+            "actor": {
+                "reference": "Practitioner/LorileiHaywood",
+                "display": "Lorilei Haywood"
+            },
+            "required": "required",
+            "status": "accepted"
+        },
+        {
+            "actor": {
+                "reference": "Location/SouthernMichiganPhysicalMedicineSpecialists",
+                "display": "Southern Michigan Physical Medicine Specialists"
+            },
+            "required": "required",
+            "status": "accepted"
+        },
+        {
+            "actor": {
+                "reference": "Organization/SouthernMichiganPhysicalMedicineSpecialists",
+                "display": "Southern Michigan Physical Medicine Specialists"
+            },
+            "required": "required",
+            "status": "accepted"
+        }
+    ]
+}

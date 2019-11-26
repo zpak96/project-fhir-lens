@@ -1,0 +1,53 @@
+{
+    "resourceType": "Encounter",
+    "id": "3264141PCP",
+    "status": "finished",
+    "class": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "AMB",
+        "display": "Ambulatory"
+    },
+    "type": [
+        {
+            "coding": [
+                {
+                    "system": "http://snomed.info/sct",
+                    "code": "5351000124100",
+                    "display": "Primary Care Clinic"
+                }
+            ]
+        }
+    ],
+    "subject": {
+        "reference": "Patient/SarahThompson",
+        "display": "Sarah Thompson"
+    },
+    "participant": [
+        {
+            "individual": {
+                "reference": "Practitioner/EmmaAdair",
+                "display": "Emma Adair"
+            }
+        }
+    ],
+    "period": {
+        "start": "2018-03-26T00:00:00Z"
+    },
+    "length": {
+        "value": 45,
+        "unit": "minutes",
+        "system": "http://unitsofmeasure.org",
+        "code": "min"
+    },
+    "diagnosis": [
+        {
+            "condition": {
+                "reference": "Condition/LowerBackPain3264141"
+            }
+        }
+    ],
+    "serviceProvider": {
+        "reference": "Organization/FivePointsFamilyMedicine",
+        "display": "Five Points Family Medicine"
+    }
+}
