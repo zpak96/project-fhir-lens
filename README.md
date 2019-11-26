@@ -10,8 +10,13 @@ solution for making sure that my JSON FHIR resources were in fact valid. With ho
 Please refer to the "requirements.txt" for installing needed packages
 
 Python 3+
+<<<<<<< HEAD
 
 JSONSchema
+=======
+JSONSchema
+
+>>>>>>> 70a529045e560bc20590e3e15d7ef90d589f22fc
 ```
 pip3 install -r "requirements.txt"
 ```
@@ -38,7 +43,11 @@ python verify.py
 For invalid files, you can then run verify.py with the "expand" argument to find the errors in each file.
 
 ```
-python verify.py
+<<<<<<< HEAD
+python verify.py expand
+=======
+python verify.py expand
+>>>>>>> 70a529045e560bc20590e3e15d7ef90d589f22fc
 ```
 
 ## Built With
@@ -63,4 +72,8 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 * MiHIN and Interoperability Institute helped me cultivate a great interest in HL7 FHIR and the importance of making
 * health data more accessible and easier to send/receive.
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 70a529045e560bc20590e3e15d7ef90d589f22fc
 
