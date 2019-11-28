@@ -5,8 +5,8 @@ import json
 import glob
 import sys
 
-r4_schema = "bin/schemas/R4/fhir.r4.schema.json"
-stu3_schema = "bin/schemas/STU3/fhir.stu3.schema.json"
+r4_schema = "../bin/schemas/R4/fhir.r4.schema.json"
+stu3_schema = "../bin/schemas/STU3/fhir.stu3.schema.json"
 
 
 class Validator:
@@ -14,6 +14,7 @@ class Validator:
     classes will handle versions of FHIR the initialize function has a default schema set for R4 validation"""
 
     def __init__(self, schema_path=r4_schema, folder="bin/validate/"):
+        self.schema_name = schema_path.split('/')[-1]
         self.validator = Draft6Validator(json.loads(open(schema_path, encoding="utf8").read()))
         self.fhirBox = folder
 
@@ -62,6 +63,9 @@ class Validator:
         else:
             # Invalid JSON return
             return False
+
+    def getSchemaName(self):
+        return self.schema_name
 
 
 class R4(Validator):
