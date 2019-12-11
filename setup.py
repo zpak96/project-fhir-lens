@@ -1,11 +1,21 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from setuptools import setup
+import pkg_resources
+
+
+# DATA_PATH = pkg_resources.resource_filename('fhir.r4.schema.json', Path('schemas/'))
 
 setup(
-    name='project-fhir-lens',
+    name='fhirlens',
     version='1.0dev',
+    url='https://github.com/zpak96/project-fhir-lens',
+    author='Zane Paksi',
+    author_email='zane.paksi@outlook.com',
     packages=['fhirlens'],
+    include_package_data=True,
+    package_dir={'fhirlens': 'project-fhir-lens/fhirlens'},
+    package_data={'fhirlens': ['schemas/*.json']},
     license='Creative Commons Attribution-Noncommercial-Share Alike license',
-    long_description=open('README.md').read(),
+    long_description=open('README.md').read()
 )

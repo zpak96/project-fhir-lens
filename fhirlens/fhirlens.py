@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from jsonschema import Draft6Validator
+import os
+from pathlib import Path
 import json
 import glob
 
@@ -19,12 +21,18 @@ class Validator:
     """ Validator will hold the core validation and error interpreting, while the children
     classes will handle versions of FHIR the initialize function has a default schema set for R4 validation"""
 
-    def __init__(self, schema_path=open("../bin/schemas/R4/fhir.r4.schema.json", encoding="utf8").read(), folder="bin/validate/"):
-        self.schema_name = schema_path.split('/')[-1]
-        self.validator = Draft6Validator(json.loads(schema_path))
+    def __init__(self, schema_path=None, folder=None):
+        self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
         self.fhirBox = folder
 
-    def boolValidate(self, resource=None, folder=None, output=False):
+        if schema_path is not None:
+            self.schema = schema_path
+        else:
+            self.schema = self.base + '/fhir.r4.schema.json'
+
+        self.validator = Draft6Validator(json.loads(open(self.schema, encoding="utf8").read()))
+
+    def boolValidate(self, resource=None, folder=None):
         """ Returns bool for validity of resources"""
         if folder is not None:
             result = {}
@@ -33,30 +41,53 @@ class Validator:
 
                 filename = str(file).split('/')[-1].split("\\")[-1]
                 value = self.validator.is_valid(resource)
-                result.update({filename : value})
+                result.update({filename: value})
+
             return json.dumps(result, indent=4, sort_keys=True)
-            result.clear()
         else:
             return self.validator.is_valid(resource)
 
     def depthValidate(self, resource=None, folder=None, output=False):
         """ Returns schema path to error in file -if file is invalid """
-        errors = sorted(self.validator.iter_errors(resource), key=lambda e: e.path)
 
-        for error in errors:
-            # list comprehension of sub-errors
-            result = [list(x.schema_path) for x in sorted(error.context, key=lambda e: e.schema_path)]
-            parse = [y for y in result if 'resourceType' in y]
-            parse_two = [z[0] for z in parse]
-            parse_three = [a[0] for a in enumerate(parse_two) if a[0] != a[1]]
+        if folder is not None:
+            result = {}
+            for file in glob.iglob(folder + "**/*.json", recursive=True):
+                resource = json.loads(open(file, encoding="utf8").read())
 
-            for suberror in sorted(error.context, key=lambda e: e.schema_path):
-                if len(parse_three) < 1:
-                    print('Invalid resourceType:', "'" + resource['resourceType'] + "'", 'was unexpected')
-                    break
-                else:
-                    if int(list(suberror.schema_path)[0]) == parse_three[0]:
-                        print(list(suberror.schema_path)[1:], suberror.message)
+                filename = str(file).split('/')[-1].split("\\")[-1]
+
+                errors = sorted(self.validator.iter_errors(resource), key=lambda e: e.path)
+                for error in errors:
+                    parse_one = [list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path) if 'resourceType' in list(x.schema_path)]
+                    parse_two = [a[0] for a in enumerate(parse_one) if a[0] != a[1]]
+
+                    for suberror in sorted(error.context, key=lambda e: e.schema_path):
+                        if len(parse_two) < 1:
+                            result.update({filename: 'resourceType: ' + "'" + resource['resourceType'] + "'" + 'was unexpected'})
+                            break
+                        else:
+                            if int(list(suberror.schema_path)[0]) == parse_two[0]:
+                                try:
+                                    if result[filename]:
+                                        result[filename].update({list(suberror.schema_path)[1:][-1]: suberror.message})
+                                except KeyError as e:
+                                    result.update({filename: {list(suberror.schema_path)[1:][-1]: suberror.message}})
+
+            return json.dumps(result, indent=4, sort_keys=True)
+        else:
+            errors = sorted(self.validator.iter_errors(resource), key=lambda e: e.path)
+            for error in errors:
+                parse_one = [list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path) if 'resourceType' in list(x.schema_path)]
+                parse_two = [a[0] for a in enumerate(parse_one) if a[0] != a[1]]
+
+                for suberror in sorted(error.context, key=lambda e: e.schema_path):
+                    if len(parse_two) < 1:
+                        print({'resourceType': ''.join("'" + resource['resourceType'] + "'" + ' was unexpected')})
+                        break
+                    else:
+                        if int(list(suberror.schema_path)[0]) == parse_two[0]:
+                            print({list(suberror.schema_path)[1:][-1]: suberror.message})
 
 
 class R4(Validator):
@@ -65,12 +96,14 @@ class R4(Validator):
     Developers can use this module simply for quick schema-version clarity"""
 
     def __init__(self):
-        self.schema = open("../bin/schemas/R4/fhir.r4.schema.json", encoding="utf8").read()
+        self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
+        self.schema = self.base + "/fhir.r4.schema.json"
         super().__init__(self.schema)
 
 
 class STU3(Validator):
     def __init__(self):
-        self.schema = open("../bin/schemas/STU3/fhir.stu3.schema.json", encoding="utf8").read()
+        self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
+        self.schema = self.base + "/fhir.stu3.schema.json"
         super().__init__(self.schema)
 
