@@ -43,7 +43,7 @@ class Validator:
                 value = self.validator.is_valid(resource)
                 result.update({filename: value})
 
-            return json.dumps(result, indent=4, sort_keys=True)
+            return result
         else:
             return self.validator.is_valid(resource)
 
@@ -53,41 +53,37 @@ class Validator:
         if folder is not None:
             for file in glob.iglob(folder + "**/*.json", recursive=True):
                 resource = json.loads(open(file, encoding="utf8").read())
-
                 filename = str(file).split('/')[-1].split("\\")[-1]
 
                 errors = sorted(self.validator.iter_errors(resource), key=lambda e: e.path)
                 for error in errors:
-                    parse_one = [list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path) if 'resourceType' in list(x.schema_path)]
-                    parse_two = [a[0] for a in enumerate(parse_one) if a[0] != a[1]]
+                    parse = [a[0] for a in enumerate([list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path) if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
 
                     for suberror in sorted(error.context, key=lambda e: e.schema_path):
-                        if len(parse_two) < 1:
+                        if len(parse) < 1:
                             result.update({filename: 'resourceType: ' + "'" + resource['resourceType'] + "'" + 'was unexpected'})
                             break
                         else:
-                            if int(list(suberror.schema_path)[0]) == parse_two[0]:
+                            if int(list(suberror.schema_path)[0]) == parse[0]:
                                 try:
                                     if result[filename]:
                                         result[filename].update({list(suberror.schema_path)[1:][-1]: suberror.message})
                                 except KeyError as e:
                                     result.update({filename: {list(suberror.schema_path)[1:][-1]: suberror.message}})
-
-            return json.dumps(result, indent=4, sort_keys=True)
+            return result
         else:
             errors = sorted(self.validator.iter_errors(resource), key=lambda e: e.path)
             for error in errors:
-                parse_one = [list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path) if 'resourceType' in list(x.schema_path)]
-                parse_two = [a[0] for a in enumerate(parse_one) if a[0] != a[1]]
+                parse = [a[0] for a in enumerate([list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path) if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
+
                 for suberror in sorted(error.context, key=lambda e: e.schema_path):
-                    if len(parse_two) < 1:
+                    if len(parse) < 1:
                         result.update({'resourceType: ' + "'" + resource['resourceType'] + "'" + 'was unexpected'})
                         break
                     else:
-                        if int(list(suberror.schema_path)[0]) == parse_two[0]:
+                        if int(list(suberror.schema_path)[0]) == parse[0]:
                             result.update({list(suberror.schema_path)[1:][-1]: suberror.message})
-
-            return json.dumps(result, indent=4, sort_keys=True)
+            return result
 
 
 class R4(Validator):

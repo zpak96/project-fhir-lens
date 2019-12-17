@@ -5,41 +5,24 @@ Targeted audience:
 This validator is created with the developers in mind. In the current Health IT space, I have found it difficult to find a quick
 solution for making sure that my JSON FHIR resources were in fact valid. With hopes, this validator will provide quick validation
 
-### Prerequisites
+### Installation Instructions
+1. Clone this repository and navigate to the base project directory.
 
-Please refer to the "requirements.txt" for installing needed packages
+2. Update setuptools and wheel:
+```python3 -m pip3 install --user --upgrade setuptools wheel```
 
-Python 3+
-JSONSchema
+2. Install the requirements:
+```pip3 install -r requirements.txt```
 
-```
-pip3 install -r "requirements.txt"
-```
+3. Setup the package for install:
+```python3 setup.py sdist bdist_wheel```
 
-### Installing
+4. Install the package and update Python dependencies:
+```pip3 install dist/fhirlens-1.0-py3-none-any.whl```
 
-Clone or download this project into your working directory
-
-```
-/home/user/development$ git clone https://github.com/zpak96/project-fhir-lens.git
-```
-
-Navigate into the project-fhir-lens/ -> From here, place resources, or folders of resources, you would like validated
-in the "assets/validate/" directory.
-
-### Getting Started
-
-Running verify.py will print out boolean values of the FHIR R4 validity.
-
-```
-python verify.py
-```
-
-For invalid files, you can then run verify.py with the "expand" argument to find the errors in each file.
-
-```
-python verify.py expand
-```
+### Usage
+To import this package into your code, include this import statement:
+```from fhirlens import fhirlens```
 
 ## Built With
 

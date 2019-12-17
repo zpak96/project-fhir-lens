@@ -8,7 +8,7 @@ import pkg_resources
 
 setup(
     name='fhirlens',
-    version='2.0dev',
+    version='1.0',
     url='https://github.com/zpak96/project-fhir-lens',
     author='Zane Paksi',
     author_email='zane.paksi@outlook.com',
