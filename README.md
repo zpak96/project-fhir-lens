@@ -24,6 +24,8 @@ solution for making sure that my JSON FHIR resources were in fact valid. With ho
 To import this package into your code, include this import statement:
 ```from fhirlens import fhirlens```
 
+> For examples of FHIR R4 resources see, under the JSON section, [HL7 FHIR Downloads](https://www.hl7.org/fhir/downloads.html)
+
 ## Built With
 
 * [jsonschema](https://pypi.org/project/jsonschema/) - The framework in which I utilize validation
