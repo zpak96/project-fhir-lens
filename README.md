@@ -18,7 +18,7 @@ solution for making sure that my JSON FHIR resources were in fact valid. With ho
 ```python setup.py sdist bdist_wheel```
 
 4. Install the package and update Python dependencies:
-```pip3 install dist/fhirlens-2.1dev-py3-none-any.whl```
+```pip3 install dist/fhirlens-2.1.dev0-py3-none-any.whl```
 
 ### Usage
 To import this package into your code, include this import statement:
