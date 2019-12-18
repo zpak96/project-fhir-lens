@@ -9,16 +9,16 @@ solution for making sure that my JSON FHIR resources were in fact valid. With ho
 1. Clone this repository and navigate to the base project directory.
 
 2. Update setuptools and wheel:
-```python3 -m pip3 install --user --upgrade setuptools wheel```
+```python -m pip3 install --user --upgrade setuptools wheel```
 
 2. Install the requirements:
 ```pip3 install -r requirements.txt```
 
 3. Setup the package for install:
-```python3 setup.py sdist bdist_wheel```
+```python setup.py sdist bdist_wheel```
 
 4. Install the package and update Python dependencies:
-```pip3 install dist/fhirlens-1.0-py3-none-any.whl```
+```pip3 install dist/fhirlens-2.1dev-py3-none-any.whl```
 
 ### Usage
 To import this package into your code, include this import statement:
