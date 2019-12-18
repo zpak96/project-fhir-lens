@@ -7,6 +7,8 @@ import json
 import glob
 
 
+# TODO: Decide if this method to be removed or utilized.
+# TODO: Add folder and output functionality -If kept
 def jsonValidate(resource):
     try:
         json.loads(resource)
@@ -18,22 +20,25 @@ def jsonValidate(resource):
 
 
 class Validator:
-    """ Validator will hold the core validation and error interpreting, while the children
-    classes will handle versions of FHIR the initialize function has a default schema set for R4 validation"""
+    """ Parent Validator will hold the core validation and error interpreting, while the children
+    classes will handle versions of FHIR. __Init__ defaults to R4 schema validation"""
 
-    def __init__(self, schema_path=None, folder=None):
+    def __init__(self, schema_path=None):
         self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
-        self.fhirBox = folder
 
+        # This is for handling child schemas
         if schema_path is not None:
             self.schema = schema_path
         else:
             self.schema = self.base + '/fhir.r4.schema.json'
 
+        # Creates JSONSchema validator using our FHIR schema
         self.validator = Draft6Validator(json.loads(open(self.schema, encoding="utf8").read()))
 
+    # TODO: Add output option to method
     def boolValidate(self, resource=None, folder=None):
         """ Returns bool for validity of resources"""
+
         if folder is not None:
             result = {}
             for file in glob.iglob(folder + "**/*.json", recursive=True):
@@ -42,14 +47,15 @@ class Validator:
                 filename = str(file).split('/')[-1].split("\\")[-1]
                 value = self.validator.is_valid(resource)
                 result.update({filename: value})
-
             return result
         else:
             return self.validator.is_valid(resource)
 
+    # TODO: Remove code duplication between folder and singular resource options
+    # TODO: Create static method for folder recursion / output -> able to reuse for boolValidate too
     def depthValidate(self, resource=None, folder=None, output=False):
-        """ Returns schema path to error in file -if file is invalid.
-        Can accept singular resources or directories"""
+        """ Returns schema path to error in file -if file is invalid. Can accept singular resources or directories"""
+
         result = {}
         if folder is not None:
             for file in glob.iglob(folder + "**/*.json", recursive=True):
@@ -110,11 +116,14 @@ class R4(Validator):
 
 class STU3(Validator):
     """This module utilizes the FHIR STU3 schema for validation"""
+
     def __init__(self):
         self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
         self.schema = self.base + "/fhir.stu3.schema.json"
         super().__init__(self.schema)
 
 
+# TODO: Add functionality to cmd execution of package
+# TODO: Return pkg version / utilize validation methods
 if __name__ == "__main__":
-    import sys
+    pass
