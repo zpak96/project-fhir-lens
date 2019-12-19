@@ -81,7 +81,6 @@ class Validator:
                     parse = [a[0] for a in enumerate([list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path) if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
 
         elif batch is not None:
-            # TODO: Current state cannot handle JSONDecode errors
             errorFiles = [x for x, y in batch.items() if not y]
             for file in errorFiles:
                 del batch[file]

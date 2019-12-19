@@ -1,0 +1,11 @@
+MANIFEST.in
+README.md
+setup.py
+../project-fhir-lens/fhirlens/__init__.py
+../project-fhir-lens/fhirlens/fhirlens.py
+fhirlens.egg-info/PKG-INFO
+fhirlens.egg-info/SOURCES.txt
+fhirlens.egg-info/dependency_links.txt
+fhirlens.egg-info/top_level.txt
+fhirlens/schemas/fhir.r4.schema.json
+fhirlens/schemas/fhir.stu3.schema.json
