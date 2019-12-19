@@ -8,7 +8,7 @@ import glob
 
 
 # TODO: Decide if this method to be removed or utilized.
-# TODO: Add folder and output functionality -If kept
+# TODO: Add folder and output functionality -if kept
 def jsonValidate(resource):
     try:
         json.loads(resource)
@@ -53,6 +53,7 @@ class Validator:
 
     # TODO: Remove code duplication between folder and singular resource options
     # TODO: Create static method for folder recursion / output -> able to reuse for boolValidate too
+    # TODO: Use jsonValidate() in here and boolValidate -> Current state cannot handle JSONDecode / TypeErrors
     def depthValidate(self, resource=None, folder=None, output=False):
         """ Returns schema path to error in file -if file is invalid. Can accept singular resources or directories"""
 
