@@ -23,6 +23,10 @@ def jsonValidate(resource):
             return e
 
 
+def convertFilename(file):
+    return str(file).split('/')[-1].split("\\")[-1]
+
+
 class Validator:
     """ Parent Validator will hold the core validation and error interpreting, while the children
     classes will handle versions of FHIR. __Init__ defaults to R4 schema validation"""
@@ -77,19 +81,38 @@ class Validator:
     def __dissect(self, resource=None, batch=None):
         if resource is not None:
             errors = sorted(self.validator.iter_errors(resource), key=lambda e: e.path)
+            filename = convertFilename(resource)
+
             for error in errors:
-                    parse = [a[0] for a in enumerate([list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path) if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
+
+                parse = [a[0] for a in enumerate([list(x.schema_path)[0] for x in
+                                                  sorted(error.context, key=lambda e: e.schema_path)
+                                                  if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
+
+                for suberror in sorted(error.context, key=lambda e: e.schema_path):
+                        if len(parse) < 1:
+                            batch.update({filename: 'resourceType: ' + "'" + resource['resourceType'] + "'" + 'was unexpected'})
+                            break
+                        else:
+                            if int(list(suberror.schema_path)[0]) == parse[0]:
+                                try:
+                                    if batch[filename]:
+                                        batch[filename].update({list(suberror.schema_path)[1:][-1]: suberror.message})
+                                except KeyError as e:
+                                    batch.update({filename: {list(suberror.schema_path)[1:][-1]: suberror.message}})
+            return batch
 
         elif batch is not None:
-            # TODO: Current state cannot handle JSONDecode errors
             errorFiles = [x for x, y in batch.items() if not y]
             for file in errorFiles:
                 del batch[file]
+                filename = convertFilename(file)
                 data = json.loads(open(Path(file), encoding="utf8").read())
                 errors = sorted(self.validator.iter_errors(data), key=lambda e: e.path)
-                filename = str(file).split('/')[-1].split("\\")[-1]
                 for error in errors:
-                    parse = [a[0] for a in enumerate([list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path) if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
+                    parse = [a[0] for a in enumerate([list(x.schema_path)[0] for x in
+                                                      sorted(error.context, key=lambda e: e.schema_path)
+                                                      if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
 
                     for suberror in sorted(error.context, key=lambda e: e.schema_path):
                         if len(parse) < 1:
@@ -103,60 +126,6 @@ class Validator:
                                 except KeyError as e:
                                     batch.update({filename: {list(suberror.schema_path)[1:][-1]: suberror.message}})
             return batch
-
-
-
-    # TODO: Remove code duplication between folder and singular resource options
-    # TODO: Create static method for folder recursion / output -> able to reuse for boolValidate too
-    # TODO: Use jsonValidate() in here and boolValidate -> Current state cannot handle JSONDecode / TypeErrors
-    def depthValidate(self, resource=None, folder=None, output=False):
-        """ Returns schema path to error in file -if file is invalid. Can accept singular resources or directories"""
-
-        result = {}
-        if folder is not None:
-            for file in glob.iglob(folder + "**/*.json", recursive=True):
-                resource = json.loads(open(file, encoding="utf8").read())
-                filename = str(file).split('/')[-1].split("\\")[-1]
-
-                errors = sorted(self.validator.iter_errors(resource), key=lambda e: e.path)
-                for error in errors:
-                    parse = [a[0] for a in enumerate([list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path)
-                                                      if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
-
-                    for suberror in sorted(error.context, key=lambda e: e.schema_path):
-                        if len(parse) < 1:
-                            result.update({filename: 'resourceType: ' + "'" + resource['resourceType'] + "'" + 'was unexpected'})
-                            break
-                        else:
-                            if int(list(suberror.schema_path)[0]) == parse[0]:
-                                try:
-                                    if result[filename]:
-                                        result[filename].update({list(suberror.schema_path)[1:][-1]: suberror.message})
-                                except KeyError as e:
-                                    result.update({filename: {list(suberror.schema_path)[1:][-1]: suberror.message}})
-            if output:
-                with open("output.txt", 'w') as json_file:
-                    json.dump(result, json_file, indent=4)
-                    json_file.close()
-            return result
-        else:
-            errors = sorted(self.validator.iter_errors(resource), key=lambda e: e.path)
-            for error in errors:
-                parse = [a[0] for a in enumerate([list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path)
-                                                  if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
-
-                for suberror in sorted(error.context, key=lambda e: e.schema_path):
-                    if len(parse) < 1:
-                        result.update({'resourceType: ' + "'" + resource['resourceType'] + "'" + 'was unexpected'})
-                        break
-                    else:
-                        if int(list(suberror.schema_path)[0]) == parse[0]:
-                            result.update({list(suberror.schema_path)[1:][-1]: suberror.message})
-            if output:
-                with open("output.txt", 'w') as json_file:
-                    json.dump(result, json_file, indent=4)
-                    json_file.close()
-            return result
 
 
 class R4(Validator):

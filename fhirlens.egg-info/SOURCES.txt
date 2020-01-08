@@ -1,8 +1,8 @@
 MANIFEST.in
 README.md
 setup.py
-../project-fhir-lens/fhirlens/__init__.py
-../project-fhir-lens/fhirlens/fhirlens.py
+fhirlens/__init__.py
+fhirlens/fhirlens.py
 fhirlens.egg-info/PKG-INFO
 fhirlens.egg-info/SOURCES.txt
 fhirlens.egg-info/dependency_links.txt
