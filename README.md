@@ -18,7 +18,7 @@ solution for making sure that my JSON FHIR resources were in fact valid. With ho
 ```python setup.py sdist bdist_wheel```
 
 4. Install the package and update Python dependencies:
-```pip3 install dist/fhirlens-2.1.dev0-py3-none-any.whl```
+```pip3 install dist/fhirlens-2.3.dev0-py3-none-any.whl```
 
 ### Usage
 To import this package into your code, include this import statement:
@@ -28,7 +28,8 @@ To import this package into your code, include this import statement:
 
 ## Built With
 
-* [jsonschema](https://pypi.org/project/jsonschema/) - The framework in which I utilize validation
+* [fastjsonschema](https://pypi.org/project/fastjsonschema/) - Validation framework
+* [jsonschema](https://pypi.org/project/jsonschema/) - Validation framework
 * [HL7 FHIR Specs](http://hl7.org/fhir/) - Research and schemas
 
 ## Authors
@@ -45,7 +46,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 * Michigan Health Information Network (MiHIN) - https://mihin.org/
 * Interoperability Institute - https://interoperabilityinstitute.org/
 
-* MiHIN and Interoperability Institute helped me cultivate a great interest in HL7 FHIR and the importance of making
-* health data more accessible and easier to send/receive.
 
 
