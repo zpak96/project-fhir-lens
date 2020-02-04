@@ -15,12 +15,12 @@ def jsonValidate(resource):
         data = json.loads(resource)
         return data
     except json.JSONDecodeError as e:
-        return e
+        return str(e)
     except TypeError as e:
         if type(resource) == dict:
             return resource
         else:
-            return e
+            return str(e)
 
 
 def convertFilename(file):
@@ -51,17 +51,19 @@ class Validator:
 
         result = {}
         if folder is not None:
+            # TODO: Some sort of path checking. Had erorr where missing trailing '/' caused many issues
             for file in glob.iglob(folder + "**/*.json", recursive=True):
                 filename = file
                 resource = jsonValidate(open(file, encoding="utf8").read())
 
+                # if string, error was excepted
                 if type(resource) == str:
-                    filename = str(file).split('/')[-1].split("\\")[-1]
+                    filename = convertFilename(file)
                     result.update({filename: resource})
                 else:
                     try:
                         self.fastvalidate(resource)
-                        filename = str(file).split('/')[-1].split("\\")[-1]
+                        filename = convertFilename(file)
                         result.update({filename: True})
                     except fastjsonschema.JsonSchemaException as e:
                         result.update({filename: False})
