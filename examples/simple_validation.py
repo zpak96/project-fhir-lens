@@ -9,7 +9,7 @@ def main():
 
     validator = fhirlens.Validator()
 
-    output = validator.validate(folder="/home/zane/Downloads/DaisyBarnes/")
+    output = validator.fhirValidate("/path/to/your/resources/")
     
     filename = "Output" + datetime.now().strftime("%m%d-%H%M-%S") + ".txt"
 

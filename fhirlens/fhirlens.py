@@ -6,30 +6,12 @@ import os
 from pathlib import Path
 import json
 import glob
-
-
-# TODO: Decide if this method to be removed or utilized.
-# TODO: Add folder and output functionality -if kept
-def jsonValidate(resource):
-    try:
-        data = json.loads(resource)
-        return data
-    except json.JSONDecodeError as e:
-        return str(e)
-    except TypeError as e:
-        if type(resource) == dict:
-            return resource
-        else:
-            return str(e)
-
-
-def convertFilename(file):
-    return str(file).split('/')[-1].split("\\")[-1]
+import re
 
 
 class Validator:
     """ Parent Validator will hold the core validation and error interpreting, while the children
-    classes will handle versions of FHIR. __Init__ defaults to R4 schema validation"""
+    classes will handle versions of FHIR. __Init__ defaults to latest FHIR schema"""
 
     def __init__(self, schema_path=None):
         self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
@@ -40,99 +22,97 @@ class Validator:
         else:
             self.schema = self.base + '/fhir.r4.schema.json'
 
-        # Creates JSONSchema validator using our FHIR schema
         self.validator = Draft6Validator(json.loads(open(self.schema, encoding="utf8").read()))
-        # TODO: implement fast validate for faster results
         self.fastvalidate = fastjsonschema.compile(json.load(open(self.schema, encoding="utf8")))
 
-    # TODO: Add output option to method
-    def validate(self, resource=None, folder=None):
-        """ Returns bool for validity of resources"""
+    def jsonValidate(self, resource):
+        try:
+            data = json.loads(resource)
+            return data
+        except json.JSONDecodeError as e:
+            return str(e)
+        except TypeError as e:
+            if type(resource) == dict:
+                return resource
+            else:
+                return str(e)
 
-        result = {}
+    def convertFilename(self, file):
+        return re.split('/|\\\\', file)[-1]
+
+    def buildPathIndex(self, folder):
+        pathIndex = []
         if folder is not None:
             # TODO: Some sort of path checking. Had erorr where missing trailing '/' caused many issues
             for file in glob.iglob(folder + "**/*.json", recursive=True):
                 filename = file
-                resource = jsonValidate(open(file, encoding="utf8").read())
+                pathIndex.append(filename)
+        return pathIndex
 
-                # if string, error was excepted
-                if type(resource) == str:
-                    filename = convertFilename(file)
-                    result.update({filename: resource})
+    def parseValidationError(self, error):
+        errorLocation = [a[0] for a in enumerate([list(x.schema_path)[0] for x in
+                        sorted(error.context, key=lambda e: e.schema_path)
+                        if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
+        return errorLocation
+
+    def resolveValidationErrors(self, boolResults):
+        """ replaces invalid resources boolean value with their actual validation errors"""
+        invalidFiles = [x for x, y in boolResults.items() if not y]
+        for file in invalidFiles:
+            del boolResults[file]
+            filename = self.convertFilename(file)
+            invalidResource = json.loads(open(Path(file), encoding="utf8").read())
+
+            errors = sorted(self.validator.iter_errors(invalidResource), key=lambda e: e.path)
+            for error in errors:
+                parse = self.parseValidationError(error)
+                for suberror in sorted(error.context, key=lambda e: e.schema_path):
+                    if len(parse) < 1:
+                        boolResults.update({filename: 'resourceType: ' + "'" + invalidResource['resourceType'] + "'" + 'was unexpected'})
+                    elif int(list(suberror.schema_path)[0]) == parse[0]:
+                        try:
+                            boolResults[filename].update({list(suberror.schema_path)[1:][-1]: suberror.message})
+                        except KeyError as e:
+                            boolResults.update({filename: {list(suberror.schema_path)[1:][-1]: suberror.message}})
+        return boolResults
+
+    def fhirValidate(self, resourceLocation):
+        """ fhirValidate creates a dictionary of resources. filename as the key, and the
+            boolean depending on if the resource is valid"""
+        boolResults = {}
+        if Path.is_dir(Path(resourceLocation)):
+            pathIndex = self.buildPathIndex(resourceLocation)
+
+            for file in pathIndex:
+                resourceValidate = self.jsonValidate(open(file, encoding="utf8").read())
+                filename = self.convertFilename(file)
+
+                # if string, error was excepted in jsonValidate()
+                if type(resourceValidate) == str:
+                    boolResults.update({filename: resourceValidate})
                 else:
                     try:
-                        self.fastvalidate(resource)
-                        filename = convertFilename(file)
-                        result.update({filename: True})
+                        self.fastvalidate(resourceValidate)
+                        boolResults.update({filename: True})
                     except fastjsonschema.JsonSchemaException as e:
-                        result.update({filename: False})
-            return self.__dissect(batch=result)
+                        boolResults.update({file: False})
         else:
-            resource = jsonValidate(resource)
+            resourceValidate = self.jsonValidate(resourceLocation)
 
-            if type(resource) == str:
-                return resource
+            if type(resourceValidate) == str:
+                boolResults.update({resourceLocation: resourceValidate})
             else:
                 try:
-                    self.fastvalidate(resource)
-                    return True
+                    self.fastvalidate(resourceLocation)
+                    boolResults.update({resourceLocation: True})
                 except fastjsonschema.JsonSchemaException as e:
-                    self.__dissect(resource)
+                    boolResults.update({resourceLocation: False})
 
-    def __dissect(self, resource=None, batch=None):
-        if resource is not None:
-            errors = sorted(self.validator.iter_errors(resource), key=lambda e: e.path)
-            filename = convertFilename(resource)
-
-            for error in errors:
-
-                parse = [a[0] for a in enumerate([list(x.schema_path)[0] for x in
-                                                  sorted(error.context, key=lambda e: e.schema_path)
-                                                  if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
-
-                for suberror in sorted(error.context, key=lambda e: e.schema_path):
-                        if len(parse) < 1:
-                            batch.update({filename: 'resourceType: ' + "'" + resource['resourceType'] + "'" + 'was unexpected'})
-                            break
-                        else:
-                            if int(list(suberror.schema_path)[0]) == parse[0]:
-                                try:
-                                    if batch[filename]:
-                                        batch[filename].update({list(suberror.schema_path)[1:][-1]: suberror.message})
-                                except KeyError as e:
-                                    batch.update({filename: {list(suberror.schema_path)[1:][-1]: suberror.message}})
-            return batch
-
-        elif batch is not None:
-            errorFiles = [x for x, y in batch.items() if not y]
-            for file in errorFiles:
-                del batch[file]
-                filename = convertFilename(file)
-                data = json.loads(open(Path(file), encoding="utf8").read())
-                errors = sorted(self.validator.iter_errors(data), key=lambda e: e.path)
-                for error in errors:
-                    parse = [a[0] for a in enumerate([list(x.schema_path)[0] for x in
-                                                      sorted(error.context, key=lambda e: e.schema_path)
-                                                      if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
-
-                    for suberror in sorted(error.context, key=lambda e: e.schema_path):
-                        if len(parse) < 1:
-                            batch.update({filename: 'resourceType: ' + "'" + resource['resourceType'] + "'" + 'was unexpected'})
-                            break
-                        else:
-                            if int(list(suberror.schema_path)[0]) == parse[0]:
-                                try:
-                                    if batch[filename]:
-                                        batch[filename].update({list(suberror.schema_path)[1:][-1]: suberror.message})
-                                except KeyError as e:
-                                    batch.update({filename: {list(suberror.schema_path)[1:][-1]: suberror.message}})
-            return batch
-
+        return self.resolveValidationErrors(boolResults)
 
 class R4(Validator):
-    """This module may be redundant in the validators current state. I've set R4 for the default Parent schema.
-    In future updates though, the default could change to the latest FHIR version. So i'm keeping this here.
+    """This module may be redundant in the package's current state. I've set R4 for the default Parent schema.
+    In future updates though, the latest FHIR version will be the parent. So i'm keeping this here.
     Developers can use this module for quick, schema-version, clarity"""
 
     def __init__(self):
@@ -151,6 +131,6 @@ class STU3(Validator):
 
 
 # TODO: Add functionality to cmd execution of package
-# TODO: Return pkg version / utilize validation methods
+#       Return pkg version / utilize validation methods
 if __name__ == "__main__":
     pass
