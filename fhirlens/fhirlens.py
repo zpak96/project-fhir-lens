@@ -83,9 +83,9 @@ class Validator:
         if Path.is_dir(Path(resourceLocation)):
             pathIndex = self.buildPathIndex(resourceLocation)
 
-            for file in pathIndex:
-                resourceValidate = self.jsonValidate(open(file, encoding="utf8").read())
-                filename = self.convertFilename(file)
+            for resourceLocation in pathIndex:
+                resourceValidate = self.jsonValidate(open(resourceLocation, encoding="utf8").read())
+                filename = self.convertFilename(resourceLocation)
 
                 # if string, error was excepted in jsonValidate()
                 if type(resourceValidate) == str:
@@ -95,7 +95,7 @@ class Validator:
                         self.fastvalidate(resourceValidate)
                         boolResults.update({filename: True})
                     except fastjsonschema.JsonSchemaException as e:
-                        boolResults.update({file: False})
+                        boolResults.update({resourceLocation: False})
         else:
             resourceValidate = self.jsonValidate(resourceLocation)
 
