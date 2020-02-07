@@ -8,8 +8,8 @@ from datetime import datetime
 def main():
 
     validator = fhirlens.Validator()
-
-    output = validator.fhirValidate("/path/to/your/resources/")
+    # /path/to/your/resource/
+    output = validator.fhirValidate("/path/to/your/resource/")
     
     filename = "Output" + datetime.now().strftime("%m%d-%H%M-%S") + ".txt"
 
