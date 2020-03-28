@@ -1,38 +1,28 @@
-# FHIR Lens
-Project-Fhir-Lens was created as as my capstone project in my Advanced Software Engineering course.
+# Fast client-side FHIR Validation
 
-Targeted audience:
-This validator is created with the developers in mind. In the current Health IT space, I have found it difficult to find a quick
-solution for making sure that my JSON FHIR resources were in fact valid. With hopes, this validator will provide quick validation
+This Python package provides the tools needed to ensure the validity of Fast Healthcare Interoperability resources (FHIR)
 
-### Installation Instructions
-1. Clone this repository and navigate to the base project directory.
+### Prerequisites
 
-2. Update setuptools and wheel:
-```python -m pip3 install --user --upgrade setuptools wheel```
 
-2. Install the requirements:
-```pip3 install -r requirements.txt```
 
-3. Setup the package for install:
-```python setup.py sdist bdist_wheel```
-
-4. Install the package and update Python dependencies:
-```pip3 install dist/fhirlens-2.3.dev0-py3-none-any.whl```
+### Installation
+1. 
 
 ### Usage
 To import this package into your code, include this import statement:
 ```from fhirlens import fhirlens```
 
-> For examples of FHIR R4 resources see, under the JSON section, [HL7 FHIR Downloads](https://www.hl7.org/fhir/downloads.html)
+```For examples of FHIR R4 resources see, under the JSON section, [HL7 FHIR Downloads](https://www.hl7.org/fhir/downloads.html)```
 
 ## Built With
 
+* [Python3](https://www.python.org/)
 * [fastjsonschema](https://pypi.org/project/fastjsonschema/) - Validation framework
 * [jsonschema](https://pypi.org/project/jsonschema/) - Validation framework
-* [HL7 FHIR Specs](http://hl7.org/fhir/) - Research and schemas
+* [HL7 FHIR Specs](http://hl7.org/fhir/) - Documentation and schemas
 
-## Authors
+## Author
 
 * **Zane Paksi** - *Research and Development* - [Zpak96](https://github.com/zpak96)
 
@@ -42,9 +32,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* HL7.org for the incredible documentation and examples to study
+* HL7 (Documentation and examples) - https://www.hl7.org/ 
 * Michigan Health Information Network (MiHIN) - https://mihin.org/
 * Interoperability Institute - https://interoperabilityinstitute.org/
-
-
-
