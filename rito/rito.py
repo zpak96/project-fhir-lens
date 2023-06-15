@@ -88,32 +88,24 @@ class Validator:
             path_index = self.build_path_index(resource_location)
 
             for resource_location in path_index:
-                resource_validate = self.json_validate(open(resource_location, encoding="utf8").read())
-                filename = self.convert_filename(resource_location)
-
-                # if string, error was excepted in json_validate()
-                if type(resource_validate) == str:
-                    bool_results.update({filename: resource_validate})
-                else:
-                    try:
-                        self.fast_validate(resource_validate)
-                        bool_results.update({filename: True})
-                    except fastjsonschema.JsonSchemaException as e:
-                        bool_results.update({resource_location: False})
+                bool_results = self.update_bool_results(resource_location, bool_results)
         else:
-            resource_file = open(resource_location, 'r').read()
-            resource_validate = self.json_validate(resource_file)
-
-            if type(resource_validate) == str:
-                bool_results.update({resource_location: resource_validate})
-            else:
-                try:
-                    self.fast_validate(resource_location)
-                    bool_results.update({resource_location: True})
-                except fastjsonschema.JsonSchemaException as e:
-                    bool_results.update({resource_location: False})
+            bool_results = self.update_bool_results(resource_location, bool_results)
 
         return self.resolve_validation_errors(bool_results)
+
+    def update_bool_results(self, resource_location, bool_results):
+        resource_validate = self.json_validate(open(resource_location, encoding="utf8").read())
+        filename = self.convert_filename(resource_location)
+        if type(resource_validate) == str:
+            bool_results.update({filename: resource_validate})
+        else:
+            try:
+                self.fast_validate(resource_validate)
+                bool_results.update({filename: True})
+            except fastjsonschema.JsonSchemaException as e:
+                bool_results.update({resource_location: False})
+        return bool_results
 
 
 class R4(Validator):
