@@ -1,6 +1,6 @@
 /examples/*.txt
 
 /venv
-.idea
+.idea/
 
 rito.egg-info
