@@ -23,9 +23,10 @@ class Validator:
             self.schema = self.base + '/fhir.r4.schema.json'
 
         self.validator = Draft6Validator(json.loads(open(self.schema, encoding="utf8").read()))
-        self.fastvalidate = fastjsonschema.compile(json.load(open(self.schema, encoding="utf8")))
+        self.fast_validate = fastjsonschema.compile(json.load(open(self.schema, encoding="utf8")))
 
-    def jsonValidate(self, resource):
+    @staticmethod
+    def json_validate(resource):
         try:
             data = json.loads(resource)
             return data
@@ -37,79 +38,83 @@ class Validator:
             else:
                 return str(e)
 
-    def convertFilename(self, file):
+    @staticmethod
+    def convert_filename(file):
         return re.split('/|\\\\', file)[-1]
 
-    def buildPathIndex(self, folder):
-        pathIndex = []
-        if folder is not None:
-            # TODO: Some sort of path checking. Had erorr where missing trailing '/' caused many issues
+    @staticmethod
+    def build_path_index(folder):
+        path_index = []
+        if folder:
             for file in glob.iglob(folder + "**/*.json", recursive=True):
                 filename = file
-                pathIndex.append(filename)
-        return pathIndex
+                path_index.append(filename)
+        return path_index
 
-    def parseValidationError(self, error):
-        errorLocation = [a[0] for a in enumerate([list(x.schema_path)[0] for x in
-                        sorted(error.context, key=lambda e: e.schema_path)
-                        if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
-        return errorLocation
+    @staticmethod
+    def parse_validation_error(error):
+        error_location = [a[0] for a in enumerate([list(x.schema_path)[0] for x in
+                                                   sorted(error.context, key=lambda e: e.schema_path)
+                                                   if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
+        return error_location
 
-    def resolveValidationErrors(self, boolResults):
+    def resolve_validation_errors(self, bool_results):
         """ replaces invalid resources boolean value with their actual validation errors"""
-        invalidFiles = [x for x, y in boolResults.items() if not y]
-        for file in invalidFiles:
-            del boolResults[file]
-            filename = self.convertFilename(file)
-            invalidResource = json.loads(open(Path(file), encoding="utf8").read())
+        invalid_files = [x for x, y in bool_results.items() if not y]
+        for file in invalid_files:
+            del bool_results[file]
+            filename = self.convert_filename(file)
+            invalid_resources = json.loads(open(Path(file), encoding="utf8").read())
 
-            errors = sorted(self.validator.iter_errors(invalidResource), key=lambda e: e.path)
+            errors = sorted(self.validator.iter_errors(invalid_resources), key=lambda e: e.path)
             for error in errors:
-                parse = self.parseValidationError(error)
-                for suberror in sorted(error.context, key=lambda e: e.schema_path):
+                parse = self.parse_validation_error(error)
+                for sub_errors in sorted(error.context, key=lambda e: e.schema_path):
                     if len(parse) < 1:
-                        boolResults.update({filename: 'resourceType: ' + "'" + invalidResource['resourceType'] + "'" + 'was unexpected'})
-                    elif int(list(suberror.schema_path)[0]) == parse[0]:
+                        bool_results.update({filename: 'resourceType: ' + "'" + invalid_resources[
+                            'resourceType'] + "'" + 'was unexpected'})
+                    elif int(list(sub_errors.schema_path)[0]) == parse[0]:
                         try:
-                            boolResults[filename].update({list(suberror.schema_path)[1:][-1]: suberror.message})
+                            bool_results[filename].update({list(sub_errors.schema_path)[1:][-1]: sub_errors.message})
                         except KeyError as e:
-                            boolResults.update({filename: {list(suberror.schema_path)[1:][-1]: suberror.message}})
-        return boolResults
+                            bool_results.update({filename: {list(sub_errors.schema_path)[1:][-1]: sub_errors.message}})
+        return bool_results
 
-    def fhirValidate(self, resourceLocation):
-        """ fhirValidate creates a dictionary of resources. filename as the key, and the
+    def fhir_validate(self, resource_location):
+        """ fhir_validate creates a dictionary of resources. filename as the key, and the
             boolean depending on if the resource is valid"""
-        boolResults = {}
-        if Path.is_dir(Path(resourceLocation)):
-            pathIndex = self.buildPathIndex(resourceLocation)
+        bool_results = {}
+        if Path.is_dir(Path(resource_location)):
+            path_index = self.build_path_index(resource_location)
 
-            for resourceLocation in pathIndex:
-                resourceValidate = self.jsonValidate(open(resourceLocation, encoding="utf8").read())
-                filename = self.convertFilename(resourceLocation)
+            for resource_location in path_index:
+                resource_validate = self.json_validate(open(resource_location, encoding="utf8").read())
+                filename = self.convert_filename(resource_location)
 
-                # if string, error was excepted in jsonValidate()
-                if type(resourceValidate) == str:
-                    boolResults.update({filename: resourceValidate})
+                # if string, error was excepted in json_validate()
+                if type(resource_validate) == str:
+                    bool_results.update({filename: resource_validate})
                 else:
                     try:
-                        self.fastvalidate(resourceValidate)
-                        boolResults.update({filename: True})
+                        self.fast_validate(resource_validate)
+                        bool_results.update({filename: True})
                     except fastjsonschema.JsonSchemaException as e:
-                        boolResults.update({resourceLocation: False})
+                        bool_results.update({resource_location: False})
         else:
-            resource_file = open(resourceLocation, 'r').read()
-            resourceValidate = self.jsonValidate(resource_file)
+            resource_file = open(resource_location, 'r').read()
+            resource_validate = self.json_validate(resource_file)
 
-            if type(resourceValidate) == str:
-                boolResults.update({resourceLocation: resourceValidate})
+            if type(resource_validate) == str:
+                bool_results.update({resource_location: resource_validate})
             else:
                 try:
-                    self.fastvalidate(resourceLocation)
-                    boolResults.update({resourceLocation: True})
+                    self.fast_validate(resource_location)
+                    bool_results.update({resource_location: True})
                 except fastjsonschema.JsonSchemaException as e:
-                    boolResults.update({resourceLocation: False})
+                    bool_results.update({resource_location: False})
 
-        return self.resolveValidationErrors(boolResults)
+        return self.resolve_validation_errors(bool_results)
+
 
 class R4(Validator):
     """This module may be redundant in the package's current state. I've set R4 for the default Parent schema.
