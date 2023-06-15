@@ -1,4 +1,4 @@
-from fhirlens import fhirlens
+from rito import rito
 import json
 from datetime import datetime
 
@@ -7,11 +7,11 @@ from datetime import datetime
 
 def main():
 
-    validator = fhirlens.Validator()
+    validator = rito.Validator()
 
-    output = validator.fhirValidate("/path/to/your/resources/")
+    output = validator.fhirValidate("./patient.json")
     
-    filename = "Output" + datetime.now().strftime("%m%d-%H%M-%S") + ".txt"
+    filename = "output" + datetime.now().strftime("%m%d-%H%M-%S") + ".txt"
 
     with open(filename, "w") as file:
         json.dump(output, file, indent=4)

@@ -97,7 +97,8 @@ class Validator:
                     except fastjsonschema.JsonSchemaException as e:
                         boolResults.update({resourceLocation: False})
         else:
-            resourceValidate = self.jsonValidate(resourceLocation)
+            resource_file = open(resourceLocation, 'r').read()
+            resourceValidate = self.jsonValidate(resource_file)
 
             if type(resourceValidate) == str:
                 boolResults.update({resourceLocation: resourceValidate})

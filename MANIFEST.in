@@ -1,4 +1,4 @@
-include fhirlens/schemas/fhir.r4.schema.json
-include fhirlens/schemas/fhir.stu3.schema.json
+include rito/schemas/fhir.r4.schema.json
+include rito/schemas/fhir.stu3.schema.json
 
 
