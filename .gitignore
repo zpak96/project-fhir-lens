@@ -2,5 +2,6 @@
 
 /venv
 .idea/
+../rito/__pycache__/
 
 rito.egg-info
