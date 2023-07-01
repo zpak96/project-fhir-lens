@@ -7,7 +7,7 @@ from datetime import datetime
 
 def main():
 
-    validator = rito.Validator.r4()
+    validator = rito.Validator('r6')
 
     output = validator.fhir_validate("patient.json")
     
