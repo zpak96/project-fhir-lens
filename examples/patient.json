@@ -26,7 +26,7 @@
       }
     }
   ],
-  "active": true,
+  "activ": "true",
   "name": [
     {
       "use": "official",
@@ -79,7 +79,7 @@
       }
     }
   ],
-  "gender": "mal",
+  "gender": "males",
   "birthDate": "1974-12-25",
   "_birthDate": {
     "extension": [
@@ -90,7 +90,7 @@
     ]
   },
   "deceasedBoolean": false,
-  "addres": [
+  "address": [
     {
       "use": "home",
       "type": "both",

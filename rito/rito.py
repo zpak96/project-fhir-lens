@@ -9,21 +9,36 @@ import glob
 import re
 
 
-class Validator:
-    """ Parent Validator will hold the core validation and error interpreting, while the children
-    classes will handle versions of FHIR. __Init__ defaults to latest FHIR schema"""
+SUPPORTED_VERSIONS = [
+    'r5', 'r4', 'stu3'
+]
 
-    def __init__(self, schema_path=None):
+
+class Validator:
+    """ The core of validation and error interpreting """
+
+    def __init__(self, schema_version: str):
         self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
 
-        # This is for handling child schemas
-        if schema_path is not None:
-            self.schema = schema_path
+        if schema_version in SUPPORTED_VERSIONS:
+            self.schema = self.base + f'/fhir.{schema_version}.schema.json'
         else:
-            self.schema = self.base + '/fhir.r4.schema.json'
+            raise LookupError(f'Unsupported schema version: {schema_version}')
 
         self.validator = Draft6Validator(json.loads(open(self.schema, encoding="utf8").read()))
         self.fast_validate = fastjsonschema.compile(json.load(open(self.schema, encoding="utf8")))
+
+    @classmethod
+    def r5(cls):
+        return cls('r5')
+
+    @classmethod
+    def r4(cls):
+        return cls('r4')
+
+    @classmethod
+    def stu3(cls):
+        return cls('stu3')
 
     @staticmethod
     def json_validate(resource):
