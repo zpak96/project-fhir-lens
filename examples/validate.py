@@ -7,9 +7,9 @@ from datetime import datetime
 
 def main():
 
-    validator = rito.Validator()
+    validator = rito.Validator.r4()
 
-    output = validator.fhir_validate("./resources")
+    output = validator.fhir_validate("patient.json")
     
     filename = "output" + datetime.now().strftime("%m%d-%H%M-%S") + ".txt"
 

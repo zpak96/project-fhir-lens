@@ -18,7 +18,7 @@ This module does not validate that far. Meaning, false positives for validity ar
 * [Python3](https://www.python.org/)
 * [fastjsonschema](https://pypi.org/project/fastjsonschema/) - Validation framework
 * [jsonschema](https://pypi.org/project/jsonschema/) - Validation framework
-* [HL7 FHIR Specs](http://hl7.org/fhir/) - Documentation and schemas
+* [HL7 FHIR Specs](http://hl7.org/fhir/directory.html) - Documentation and schemas
 
 ### Acknowledgments
 
