@@ -9,7 +9,7 @@ def main():
 
     validator = rito.Validator('r6')
 
-    output = validator.fhir_validate("patient.json")
+    output = validator.fhir_validate("file-or-dir-here")
     
     filename = "output" + datetime.now().strftime("%m%d-%H%M-%S") + ".txt"
 
