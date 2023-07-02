@@ -127,7 +127,5 @@ class Validator:
         return bool_results
 
 
-# TODO: Add functionality to cmd execution of package
-#       Return pkg version / utilize validation methods
 if __name__ == "__main__":
     pass
