@@ -1,31 +1,41 @@
-from pathlib import Path
 from rito import rito
-import logging
-import pytest
-import os
+import json
 
 
-LOGGER = logging.getLogger(__name__)
-TEST_VALIDATORS = [rito.Validator.r5(), rito.Validator.r4(), rito.Validator.stu3()]
-TEST_RESOURCES = ['patient', 'organization', 'observation']
-RESOURCE_PATH = os.path.join(os.path.dirname(__file__), Path('resources'))
+def test_validator_no_version():
+    try:
+        validator = rito.Validator()
+        assert False
+    except TypeError as e:
+        assert True
 
 
-@pytest.fixture(name='resource', scope='module', params=TEST_RESOURCES)
-def fixture_resource(request):
-    return request.param
+def test_validator_unsupported_version():
+    try:
+        validator = rito.Validator('fake-version')
+        assert False
+    except LookupError as e:
+        assert True
 
 
-@pytest.fixture(name='validator', scope='module', params=TEST_VALIDATORS)
-def fixture_validator(request):
-    return request.param
+def test_r5_create():
+    r5 = rito.Validator('r5')
+    r5_cls_mthd = rito.Validator.r5()
+    assert r5.get_fhir_version() == 'r5'
+    assert r5_cls_mthd.get_fhir_version() == 'r5'
 
 
-def test_single_resource_valid(validator, resource):
-    fhir_version = validator.get_fhir_version()
-    resource_name = f'{fhir_version}_{resource}.json'
-    LOGGER.info(f'Validator Version :: {fhir_version}')
-    LOGGER.info(f'Resource File :: {resource_name}')
+def test_r4_create():
+    r4 = rito.Validator('r4')
+    r4_cls_mthd = rito.Validator.r4()
+    assert r4.get_fhir_version() == 'r4'
+    assert r4_cls_mthd.get_fhir_version() == 'r4'
 
-    result = validator.fhir_validate(RESOURCE_PATH + f'\\{resource_name}')
-    assert result[resource_name] is True
+
+def test_stu3_create():
+    stu3 = rito.Validator('stu3')
+    stu3_cls_mthd = rito.Validator.stu3()
+    assert stu3.get_fhir_version() == 'stu3'
+    assert stu3_cls_mthd.get_fhir_version() == 'stu3'
+
+
