@@ -1,3 +1,10 @@
+## The Path Forward
+Rito is a fork of my college capstone, Project Fhir Lens, a first iteration at validating FHIR R4 and R3.
+Rito is a large refactor of the project to reflect the skills I’ve gained in the industry. Before moving forward It's neccessary to 
+make the codebase easy to implement upon. Testing, testing, testing. That will be the focus for now. Next steps include:
+
+-DSTU2 / R5 / R6 Validation
+
 ## Fast FHIR Validation
 
 This Python package provides the tools needed to ensure the validity of Fast Healthcare Interoperability resources (FHIR)
