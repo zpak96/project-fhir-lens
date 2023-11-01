@@ -19,6 +19,7 @@ class Validator:
 
     def __init__(self, schema_version: str):
         self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
+        self.schema_version = schema_version
 
         if schema_version in SUPPORTED_VERSIONS:
             self.schema = self.base + f'/fhir.{schema_version}.schema.json'
@@ -39,6 +40,9 @@ class Validator:
     @classmethod
     def stu3(cls):
         return cls('stu3')
+
+    def get_fhir_version(self):
+        return self.schema_version
 
     @staticmethod
     def json_validate(resource):
@@ -123,27 +127,5 @@ class Validator:
         return bool_results
 
 
-class R4(Validator):
-    """This module may be redundant in the package's current state. I've set R4 for the default Parent schema.
-    In future updates though, the latest FHIR version will be the parent. So i'm keeping this here.
-    Developers can use this module for quick, schema-version, clarity"""
-
-    def __init__(self):
-        self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
-        self.schema = self.base + "/fhir.r4.schema.json"
-        super().__init__(self.schema)
-
-
-class STU3(Validator):
-    """This module utilizes the FHIR STU3 schema for validation"""
-
-    def __init__(self):
-        self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
-        self.schema = self.base + "/fhir.stu3.schema.json"
-        super().__init__(self.schema)
-
-
-# TODO: Add functionality to cmd execution of package
-#       Return pkg version / utilize validation methods
 if __name__ == "__main__":
     pass

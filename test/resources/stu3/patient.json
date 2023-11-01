@@ -11,7 +11,7 @@
       "type": {
         "coding": [
           {
-            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "system": "http://hl7.org/fhir/v2/0203",
             "code": "MR"
           }
         ]
@@ -26,7 +26,7 @@
       }
     }
   ],
-  "activ": "true",
+  "active": true,
   "name": [
     {
       "use": "official",
@@ -79,7 +79,7 @@
       }
     }
   ],
-  "gender": "males",
+  "gender": "male",
   "birthDate": "1974-12-25",
   "_birthDate": {
     "extension": [
@@ -113,7 +113,7 @@
         {
           "coding": [
             {
-              "system": "http://terminology.hl7.org/CodeSystem/v2-0131",
+              "system": "http://hl7.org/fhir/v2/0131",
               "code": "N"
             }
           ]
