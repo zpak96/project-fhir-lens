@@ -4,4 +4,7 @@
 .idea/
 ../rito/__pycache__/
 
+**/__pycache__/
+
+
 rito.egg-info
