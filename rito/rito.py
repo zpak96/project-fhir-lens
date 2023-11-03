@@ -70,73 +70,43 @@ class Validator:
                 path_index.append(filename)
         return path_index
 
+    # THIS METHOD'S PURPOSE IS TO LOCATE THE CORRECT SCHEMA
+    # TODO: simplify this resource to return -> int instead of -> list[int]
+    # TODO: rename for clarity
     @staticmethod
     def parse_validation_error(error):
-        """
-            Okay, I think this means, for context in the schema path, if resourceType is within that context, isolate it.
-            Finding the schema validation for the correct resourceType?
-            OR - Its isolating if there is an invalid resourceType error within the context
-
-            **
-                Upate!
-                https://python-jsonschema.readthedocs.io/en/stable/errors/#jsonschema.exceptions.ValidationError.schema
-                https://python-jsonschema.readthedocs.io/en/stable/errors/#jsonschema.exceptions.ValidationError.context
-
-                Since the fhir schemas are a massive schema containing mutliple schemas we need to iterate the error.context!
-                Error.context follows the error relative to the schema (sub-schema) it was thrown in.
-                --
-                Yes, ive confirmed.
-            **
-
-        """
-
-        schema_rt_errors = []
+        # rt is a shortened reference to 'resourceType'
+        schema_with_rt_errors = []
         for error in sorted(error.context, key=lambda e: e.schema_path):
-            """
-                This is very important. What this does is filter out all the false positives.
-                When an error is thrown in the fhir schemas, it throws errors in EVERY sub-schema. 
-                Meaning we will always have 145 schemas (at least in r4).
-                
-                We check how many times 'ResourceType' Occurs in the error context.
-                If it occurs equal to the amount of sub-schemas, then 'resourceType' is invalid!
-            """
-
             # TODO: Once  I get this more cleaned up - stop converting error_context to list, use it as the deque obj!!
             error_context = list(error.schema_path)
             if 'resourceType' in error_context:
-                # This appends the schema error index (which schema the error occurred)
-                schema_rt_errors.append(error_context[0])
+                # This appends the schema index (which schema the error occurred)
+                schema_with_rt_errors.append(error_context[0])
 
-        """
-            Expanding second list comp
-            I see i enumerated 'schemas'. Specifically to extract the index.
-            
-            ****
-                
-                On the other hand, if index and the schema error index are off, this means two things.
-                    1. The resourceType is valid
-                    2. There will be ONE schema that does not throw a resourceType Error.
-                        That is the resource that we need to find.
-                    
-            ****
-        """
-
-        # This will hold the indexes of schemas that threw resourceType errors.
+        # This will hold the indexes of schemas did NOT throw resourceType errors.
         # Index needed to reference in error context
-        schemas_containing_rt_errors = []
+        schemas_without_rt_errors = []
 
-        # Here we identify the resource that did NOT throw an rt error.
-        # by comparing the index, also sorted and starting from 0, when a mismatch of index, to schema_index occurs
-        # The index of the first mismatch will be the schema_index we want to use for validation.
-        for index, schema_rt_error in enumerate(schema_rt_errors):
-            if index != schema_rt_error:
-                schemas_containing_rt_errors.append(index)
+        for expected_schema_index, schema_index in enumerate(schema_with_rt_errors):
+            if expected_schema_index != schema_index:
+                schemas_without_rt_errors.append(expected_schema_index)
 
-        return schemas_containing_rt_errors
+        return schemas_without_rt_errors
 
     def resolve_validation_errors(self, bool_results):
-        """ replaces invalid resources boolean value with their actual validation errors"""
-        invalid_files = [x for x, y in bool_results.items() if not y]
+        """
+            replaces invalid resources boolean value with their actual validation errors
+            bool_results is in the form {filename: boolean} where the boolean is the validity of the file
+        """
+
+        invalid_files = []
+
+        # getting the key (filename) by checking the value
+        for filename, valid in bool_results.items():
+            if not valid:
+                invalid_files.append(filename)
+
         for file in invalid_files:
             del bool_results[file]
             filename = self.convert_filename(file)
@@ -145,22 +115,26 @@ class Validator:
             errors = sorted(self.validator.iter_errors(invalid_resources), key=lambda e: e.path)
 
             for error in errors:
-                parse = self.parse_validation_error(error)
-                for sub_errors in sorted(error.context, key=lambda e: e.schema_path):
-                    if len(parse) < 1:
+                schema_indexes = self.parse_validation_error(error)
+
+                for sub_error in sorted(error.context, key=lambda e: e.schema_path):
+                    error_key = list(sub_error.schema_path)[1:][-1]
+
+                    if len(schema_indexes) < 1:
                         bool_results.update({filename: f"Unexpected resourceType: {invalid_resources['resourceType']}"})
                     # Here is where the check occurs to determine the correct resource, and what error(s) occurred
-                    elif int(list(sub_errors.schema_path)[0]) == parse[0]:
-                        print()
-                        try:
-                            bool_results[filename].update({list(sub_errors.schema_path)[1:][-1]: sub_errors.message})
-                        except KeyError as e:
-                            bool_results.update({filename: {list(sub_errors.schema_path)[1:][-1]: sub_errors.message}})
+                    elif list(sub_error.schema_path)[0] == schema_indexes[0]:
+                        if filename in bool_results:
+                            bool_results[filename].update({error_key: sub_error.message})
+                        else:
+                            bool_results.update({filename: {error_key: sub_error.message}})
         return bool_results
 
     def fhir_validate(self, resource_location):
-        """ fhir_validate creates a dictionary of resources. filename as the key, and the
-            boolean depending on if the resource is valid"""
+        """
+            fhir_validate creates a dictionary of resources. filename as the key, and the
+            boolean depending on if the resource is valid
+        """
         bool_results = {}
         if Path.is_dir(Path(resource_location)):
             path_index = self.build_path_index(resource_location)
