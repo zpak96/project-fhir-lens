@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from jsonschema import Draft6Validator
+from jsonschema.exceptions import ValidationError
 import fastjsonschema
 import os
 from pathlib import Path
@@ -58,8 +59,8 @@ class Validator:
                 return str(e)
 
     @staticmethod
-    def convert_filename(file):
-        return re.split('/|\\\\', file)[-1]
+    def normalize_filename(filename):
+        return re.split('/|\\\\', filename)[-1]
 
     @staticmethod
     def build_path_index(folder):
@@ -70,94 +71,94 @@ class Validator:
                 path_index.append(filename)
         return path_index
 
-    # THIS METHOD'S PURPOSE IS TO LOCATE THE CORRECT SCHEMA
-    # TODO: simplify this resource to return -> int instead of -> list[int]
-    # TODO: rename for clarity
     @staticmethod
-    def parse_validation_error(error):
-        # rt is a shortened reference to 'resourceType'
-        schema_with_rt_errors = []
-        for error in sorted(error.context, key=lambda e: e.schema_path):
-            # TODO: Once  I get this more cleaned up - stop converting error_context to list, use it as the deque obj!!
-            error_context = list(error.schema_path)
-            if 'resourceType' in error_context:
-                # This appends the schema index (which schema the error occurred)
-                schema_with_rt_errors.append(error_context[0])
-
-        # This will hold the indexes of schemas did NOT throw resourceType errors.
-        # Index needed to reference in error context
-        schemas_without_rt_errors = []
-
-        for expected_schema_index, schema_index in enumerate(schema_with_rt_errors):
-            if expected_schema_index != schema_index:
-                schemas_without_rt_errors.append(expected_schema_index)
-
-        return schemas_without_rt_errors
-
-    def resolve_validation_errors(self, bool_results):
+    def locate_schema(schema_error: ValidationError) -> list:
         """
-            replaces invalid resources boolean value with their actual validation errors
-            bool_results is in the form {filename: boolean} where the boolean is the validity of the file
+            'rt' is short for resourceType
+
+            Since every sub-schema is validated against, if the fhir resourceType is valid, then there will be a single
+            schema where a resourceType error does not occur.
+
+            Below is an incrementing range from 0-n, n == the number of sub_schemas.
+            rt_error_count will increment parallel to schema_index, until the schema index skips the index of the
+            schema that did NOT throw a resourceType error. That is the schema_index we want. Luckily rt_error_count
+            will reflect the schema index number we need.
+
+            If all sub-schemas throw a resourceType error, the resourceType attribute is invalid. We return empty list.
         """
 
-        invalid_files = []
+        located_schema = []
+        rt_error_count = 0
 
-        # getting the key (filename) by checking the value
-        for filename, valid in bool_results.items():
-            if not valid:
-                invalid_files.append(filename)
+        for schema_error in sorted(schema_error.context, key=lambda e: e.schema_path):
+            sub_schema_error = schema_error.schema_path
+            schema_index = sub_schema_error[0]
+
+            if 'resourceType' in sub_schema_error and not located_schema:
+                if rt_error_count < schema_index:
+                    located_schema.append(rt_error_count)
+                else:
+                    rt_error_count += 1
+
+        return located_schema
+
+    def resolve_validation_errors(self, results):
+        """ replaces the boolean values of invalid resources in results with schema errors"""
+
+        invalid_files = [filename for filename, valid in results.items() if not valid]
 
         for file in invalid_files:
-            del bool_results[file]
-            filename = self.convert_filename(file)
-            invalid_resources = json.loads(open(Path(file), encoding="utf8").read())
+            del results[file]
+            filename = self.normalize_filename(file)
+            invalid_resource = json.loads(open(Path(file), encoding="utf8").read())
 
-            errors = sorted(self.validator.iter_errors(invalid_resources), key=lambda e: e.path)
+            errors = sorted(self.validator.iter_errors(invalid_resource), key=lambda e: e.path)
 
             for error in errors:
-                schema_indexes = self.parse_validation_error(error)
+                schema = self.locate_schema(error)
 
                 for sub_error in sorted(error.context, key=lambda e: e.schema_path):
-                    error_key = list(sub_error.schema_path)[1:][-1]
+                    error_index = sub_error.schema_path[0]
+                    error_key = sub_error.schema_path[-1]
 
-                    if len(schema_indexes) < 1:
-                        bool_results.update({filename: f"Unexpected resourceType: {invalid_resources['resourceType']}"})
+                    if not schema:
+                        results.update({filename: f"Unexpected resourceType: {invalid_resource['resourceType']}"})
                     # Here is where the check occurs to determine the correct resource, and what error(s) occurred
-                    elif list(sub_error.schema_path)[0] == schema_indexes[0]:
-                        if filename in bool_results:
-                            bool_results[filename].update({error_key: sub_error.message})
+                    elif error_index == schema[0]:
+                        if filename in results:
+                            results[filename].update({error_key: sub_error.message})
                         else:
-                            bool_results.update({filename: {error_key: sub_error.message}})
-        return bool_results
+                            results.update({filename: {error_key: sub_error.message}})
+        return results
 
-    def fhir_validate(self, resource_location):
+    def fhir_validate(self, resource_path):
         """
             fhir_validate creates a dictionary of resources. filename as the key, and the
             boolean depending on if the resource is valid
         """
-        bool_results = {}
-        if Path.is_dir(Path(resource_location)):
-            path_index = self.build_path_index(resource_location)
+        results = {}
+        if Path.is_dir(Path(resource_path)):
+            path_index = self.build_path_index(resource_path)
 
-            for resource_location in path_index:
-                bool_results = self.update_bool_results(resource_location, bool_results)
+            for path in path_index:
+                results = self.update_results(path, results)
         else:
-            bool_results = self.update_bool_results(resource_location, bool_results)
+            results = self.update_results(resource_path, results)
 
-        return self.resolve_validation_errors(bool_results)
+        return self.resolve_validation_errors(results)
 
-    def update_bool_results(self, resource_location, bool_results):
+    def update_results(self, resource_location, results):
         resource_validate = self.json_validate(open(resource_location, encoding="utf8").read())
-        filename = self.convert_filename(resource_location)
+        filename = self.normalize_filename(resource_location)
         if type(resource_validate) == str:
-            bool_results.update({filename: resource_validate})
+            results.update({filename: resource_validate})
         else:
             try:
                 self.fast_validate(resource_validate)
-                bool_results.update({filename: True})
+                results.update({filename: True})
             except fastjsonschema.JsonSchemaException as e:
-                bool_results.update({resource_location: False})
-        return bool_results
+                results.update({resource_location: False})
+        return results
 
 
 if __name__ == "__main__":
