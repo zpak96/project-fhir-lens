@@ -72,9 +72,28 @@ class Validator:
 
     @staticmethod
     def parse_validation_error(error):
-        error_location = [a[0] for a in enumerate([list(x.schema_path)[0] for x in
-                                                   sorted(error.context, key=lambda e: e.schema_path)
-                                                   if 'resourceType' in list(x.schema_path)]) if a[0] != a[1]]
+        """
+            Okay, I think this means, for context in the schema path, if resourceType is within that context, isolate it.
+            Finding the schema validation for the correct resourceType?
+            OR - Its isolating if there is an invalid resourceType error within the context
+
+            **
+                Upate!
+                https://python-jsonschema.readthedocs.io/en/stable/errors/#jsonschema.exceptions.ValidationError.schema
+                https://python-jsonschema.readthedocs.io/en/stable/errors/#jsonschema.exceptions.ValidationError.context
+
+                Since the fhir schemas are a massive schema containing mutliple schemas we need to iterate the error.context!
+                Error.context follows the error relative to the schema (sub-schema) it was thrown in.
+
+            **
+
+        """
+
+        # I was so excited when I wrote this, i had just learned list comprehensions.
+        # I am ashamed
+        wtf = [list(x.schema_path)[0] for x in sorted(error.context, key=lambda e: e.schema_path)
+               if 'resourceType' in list(x.schema_path)]
+        error_location = [a[0] for a in enumerate(wtf) if a[0] != a[1]]
         return error_location
 
     def resolve_validation_errors(self, bool_results):
@@ -86,6 +105,8 @@ class Validator:
             invalid_resources = json.loads(open(Path(file), encoding="utf8").read())
 
             errors = sorted(self.validator.iter_errors(invalid_resources), key=lambda e: e.path)
+            print(errors)
+
             for error in errors:
                 parse = self.parse_validation_error(error)
                 for sub_errors in sorted(error.context, key=lambda e: e.schema_path):

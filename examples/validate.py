@@ -7,11 +7,13 @@ from datetime import datetime
 
 def main():
 
-    validator = rito.Validator('r6')
+    validator = rito.Validator('r4')
 
-    output = validator.fhir_validate("file-or-dir-here")
-    
+    output = validator.fhir_validate("../test/resources/r4_patient.json")
+
+
     filename = "output" + datetime.now().strftime("%m%d-%H%M-%S") + ".txt"
+
 
     with open(filename, "w") as file:
         json.dump(output, file, indent=4)
