@@ -1,0 +1,13 @@
+[flake8]
+extend-ignore = E501
+# max-line-length = 99
+
+exclude =
+    .git,
+    venv,
+    __pycache__,
+    .pytest_cache,
+    test/resources,
+    rito/schemas,
+
+max-complexity = 10

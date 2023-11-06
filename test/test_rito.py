@@ -3,17 +3,17 @@ from rito import rito
 
 def test_validator_no_version():
     try:
-        validator = rito.Validator()
+        rito.Validator()
         assert False
-    except TypeError as e:
+    except TypeError:
         assert True
 
 
 def test_validator_unsupported_version():
     try:
-        validator = rito.Validator('fake-version')
+        rito.Validator('fake-version')
         assert False
-    except LookupError as e:
+    except LookupError:
         assert True
 
 
@@ -36,5 +36,3 @@ def test_stu3_create():
     stu3_cls_method = rito.Validator.stu3()
     assert stu3.get_fhir_version() == 'stu3'
     assert stu3_cls_method.get_fhir_version() == 'stu3'
-
-

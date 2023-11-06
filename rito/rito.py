@@ -48,15 +48,15 @@ class Validator:
 
     @staticmethod
     def json_validate(resource: str) -> Union[dict, str]:
-        # TODO: This method is a bit overloaded. It can return dict or str. this makes type hinting rough
-        # Using typing.Union to hint both types, in python versions 3.10 and up this can be replaced with a pipe '|'
+        # TODO: This method is a bit overloaded. It can return dict or str
+        # for this type hint python versions >= 3.10 Union can be replaced with a pipe '|'
         try:
             data = json.loads(resource)
             return data
         except json.JSONDecodeError as e:
             return str(e)
         except TypeError as e:
-            if type(resource) == dict:
+            if isinstance(resource, dict):
                 return resource
             else:
                 return str(e)
@@ -79,15 +79,17 @@ class Validator:
         """
             'rt' is short for resourceType
 
-            Since every sub-schema is validated against, if the fhir resourceType is valid, then there will be a single
-            schema where a resourceType error does not occur.
+            Since every sub-schema is validated against, if the fhir resourceType is valid,
+            then there will be a single schema where a resourceType error does not occur.
 
             Below is an incrementing range from 0-n, n == the number of sub_schemas.
-            rt_error_count will increment parallel to schema_index, until the schema index skips the index of the
-            schema that did NOT throw a resourceType error. That is the schema_index we want. Luckily rt_error_count
-            will reflect the schema index number we need.
+            rt_error_count will increment parallel to schema_index, until the schema
+            index skips the index of the schema that did NOT throw a resourceType error.
+            That is the schema_index we want. Luckily rt_error_count will reflect the
+            schema index number we need.
 
-            If all sub-schemas throw a resourceType error, the resourceType attribute is invalid. We return empty list.
+            If all sub-schemas throw a resourceType error, the resourceType attribute is invalid.
+            We return empty list.
         """
 
         located_schema = []
@@ -125,8 +127,10 @@ class Validator:
                     error_key = sub_error.schema_path[-1]
 
                     if not schema:
-                        results.update({filename: f"Unexpected resourceType: {invalid_resource['resourceType']}"})
-                    # Here is where the check occurs to determine the correct resource, and what error(s) occurred
+                        results.update(
+                            {filename: f"Unexpected resourceType: {invalid_resource['resourceType']}"}
+                        )
+                    # Here is where we check what error(s) occurred
                     elif error_index == schema[0]:
                         if filename in results:
                             results[filename].update({error_key: sub_error.message})
@@ -153,13 +157,13 @@ class Validator:
     def update_results(self, resource_location: str, results: dict) -> dict:
         resource_validate = self.json_validate(open(resource_location, encoding="utf8").read())
         filename = self.normalize_filename(resource_location)
-        if type(resource_validate) == str:
+        if isinstance(resource_validate, str):
             results.update({filename: resource_validate})
         else:
             try:
                 self.fast_validate(resource_validate)
                 results.update({filename: True})
-            except fastjsonschema.JsonSchemaException as e:
+            except fastjsonschema.JsonSchemaException:
                 results.update({resource_location: False})
         return results
 
