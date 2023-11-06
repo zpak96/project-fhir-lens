@@ -1,5 +1,4 @@
 from rito import rito
-import json
 
 
 def test_validator_no_version():
