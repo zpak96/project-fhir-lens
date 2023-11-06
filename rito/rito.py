@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
-from jsonschema import Draft6Validator
 from jsonschema.exceptions import ValidationError
-import fastjsonschema
-import os
+from jsonschema import Draft6Validator
+from typing import Union
 from pathlib import Path
+import fastjsonschema
 import json
 import glob
+import os
 import re
 
 
@@ -18,7 +19,7 @@ SUPPORTED_VERSIONS = [
 class Validator:
     """ The core of validation and error interpreting """
 
-    def __init__(self, schema_version: str):
+    def __init__(self, schema_version: str) -> None:
         self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
         self.schema_version = schema_version
 
@@ -31,22 +32,24 @@ class Validator:
         self.fast_validate = fastjsonschema.compile(json.load(open(self.schema, encoding="utf8")))
 
     @classmethod
-    def r5(cls):
+    def r5(cls) -> 'Validator':
         return cls('r5')
 
     @classmethod
-    def r4(cls):
+    def r4(cls) -> 'Validator':
         return cls('r4')
 
     @classmethod
-    def stu3(cls):
+    def stu3(cls) -> 'Validator':
         return cls('stu3')
 
-    def get_fhir_version(self):
+    def get_fhir_version(self) -> str:
         return self.schema_version
 
     @staticmethod
-    def json_validate(resource):
+    def json_validate(resource: str) -> Union[dict, str]:
+        # TODO: This method is a bit overloaded. It can return dict or str. this makes type hinting rough
+        # Using typing.Union to hint both types, in python versions 3.10 and up this can be replaced with a pipe '|'
         try:
             data = json.loads(resource)
             return data
@@ -59,11 +62,11 @@ class Validator:
                 return str(e)
 
     @staticmethod
-    def normalize_filename(filename):
+    def normalize_filename(filename: str) -> str:
         return re.split('/|\\\\', filename)[-1]
 
     @staticmethod
-    def build_path_index(folder):
+    def build_path_index(folder: str) -> list:
         path_index = []
         if folder:
             for file in glob.iglob(folder + "**/*.json", recursive=True):
@@ -102,7 +105,7 @@ class Validator:
 
         return located_schema
 
-    def resolve_validation_errors(self, results):
+    def resolve_validation_errors(self, results: dict) -> dict:
         """ replaces the boolean values of invalid resources in results with schema errors"""
 
         invalid_files = [filename for filename, valid in results.items() if not valid]
@@ -131,7 +134,7 @@ class Validator:
                             results.update({filename: {error_key: sub_error.message}})
         return results
 
-    def fhir_validate(self, resource_path):
+    def fhir_validate(self, resource_path: str) -> dict:
         """
             fhir_validate creates a dictionary of resources. filename as the key, and the
             boolean depending on if the resource is valid
@@ -147,7 +150,7 @@ class Validator:
 
         return self.resolve_validation_errors(results)
 
-    def update_results(self, resource_location, results):
+    def update_results(self, resource_location: str, results: dict) -> dict:
         resource_validate = self.json_validate(open(resource_location, encoding="utf8").read())
         filename = self.normalize_filename(resource_location)
         if type(resource_validate) == str:
