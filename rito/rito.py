@@ -108,7 +108,7 @@ class Validator:
         return located_schema
 
     def resolve_validation_errors(self, results: dict) -> dict:
-        """ replaces the boolean values of invalid resources in results with schema errors"""
+        """ replaces the boolean values of invalid data in results with schema errors"""
 
         invalid_files = [filename for filename, valid in results.items() if not valid]
 
@@ -140,7 +140,7 @@ class Validator:
 
     def fhir_validate(self, resource_path: str) -> dict:
         """
-            fhir_validate creates a dictionary of resources. filename as the key, and the
+            fhir_validate creates a dictionary of data. filename as the key, and the
             boolean depending on if the resource is valid
         """
         results = {}
