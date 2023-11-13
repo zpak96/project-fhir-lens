@@ -1,11 +1,11 @@
-/examples/*.txt
 
-/venv
 .idea/
-../rito/__pycache__/
+/venv
 
 .pytest_cache/
 **/__pycache__/
 
+/examples/*.txt
 
+../rito/__pycache__/
 rito.egg-info

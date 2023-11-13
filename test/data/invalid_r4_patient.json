@@ -1,5 +1,5 @@
 {
-  "resourceType": "Patient",
+  "resourceType": "Patien",
   "id": "example",
   "text": {
     "status": "generated",

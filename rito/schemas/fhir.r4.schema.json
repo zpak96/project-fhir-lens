@@ -1462,6 +1462,10 @@
         "valueDosage": {
           "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
           "$ref": "#/definitions/Dosage"
+        },
+        "valueMeta": {
+          "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+          "$ref": "#/definitions/Meta"
         }
       },
       "additionalProperties": false
@@ -4546,6 +4550,10 @@
           "description": "The value that should be used if there is no value stated in the instance (e.g. \u0027if not otherwise specified, the abstract is false\u0027).",
           "$ref": "#/definitions/Dosage"
         },
+        "defaultValueMeta": {
+          "description": "The value that should be used if there is no value stated in the instance (e.g. \u0027if not otherwise specified, the abstract is false\u0027).",
+          "$ref": "#/definitions/Meta"
+        },
         "meaningWhenMissing": {
           "description": "The Implicit meaning that is to be understood when this element is missing (e.g. \u0027when this element is missing, the period is ongoing\u0027).",
           "$ref": "#/definitions/markdown"
@@ -4853,6 +4861,10 @@
           "description": "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.",
           "$ref": "#/definitions/Dosage"
         },
+        "fixedMeta": {
+          "description": "Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-significant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.",
+          "$ref": "#/definitions/Meta"
+        },
         "patternBase64Binary": {
           "description": "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  \n\nWhen pattern[x] is used to constrain a primitive, it means that the value provided in the pattern[x] must match the instance value exactly.\n\nWhen pattern[x] is used to constrain an array, it means that each element provided in the pattern[x] array must (recursively) match at least one element from the instance array.\n\nWhen pattern[x] is used to constrain a complex object, it means that each property in the pattern must be present in the complex object, and its value must recursively match -- i.e.,\n\n1. If primitive: it must match exactly the pattern value\n2. If a complex object: it must match (recursively) the pattern value\n3. If an array: it must match (recursively) the pattern value.",
           "pattern": "^(\\s*([0-9a-zA-Z\\+/\u003d]){4}\\s*)+$",
@@ -5143,6 +5155,10 @@
         "patternDosage": {
           "description": "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  \n\nWhen pattern[x] is used to constrain a primitive, it means that the value provided in the pattern[x] must match the instance value exactly.\n\nWhen pattern[x] is used to constrain an array, it means that each element provided in the pattern[x] array must (recursively) match at least one element from the instance array.\n\nWhen pattern[x] is used to constrain a complex object, it means that each property in the pattern must be present in the complex object, and its value must recursively match -- i.e.,\n\n1. If primitive: it must match exactly the pattern value\n2. If a complex object: it must match (recursively) the pattern value\n3. If an array: it must match (recursively) the pattern value.",
           "$ref": "#/definitions/Dosage"
+        },
+        "patternMeta": {
+          "description": "Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  \n\nWhen pattern[x] is used to constrain a primitive, it means that the value provided in the pattern[x] must match the instance value exactly.\n\nWhen pattern[x] is used to constrain an array, it means that each element provided in the pattern[x] array must (recursively) match at least one element from the instance array.\n\nWhen pattern[x] is used to constrain a complex object, it means that each property in the pattern must be present in the complex object, and its value must recursively match -- i.e.,\n\n1. If primitive: it must match exactly the pattern value\n2. If a complex object: it must match (recursively) the pattern value\n3. If an array: it must match (recursively) the pattern value.",
+          "$ref": "#/definitions/Meta"
         },
         "example": {
           "description": "A sample value for this element demonstrating the type of information that would typically be found in the element.",
@@ -5926,6 +5942,10 @@
         "valueDosage": {
           "description": "The actual value for the element, which must be one of the types allowed for this element.",
           "$ref": "#/definitions/Dosage"
+        },
+        "valueMeta": {
+          "description": "The actual value for the element, which must be one of the types allowed for this element.",
+          "$ref": "#/definitions/Meta"
         }
       },
       "additionalProperties": false
@@ -9437,7 +9457,8 @@
             "3.0.1",
             "3.3.0",
             "3.5.0",
-            "4.0.0"
+            "4.0.0",
+            "4.0.1"
           ]
         },
         "_fhirVersion": {
@@ -16707,7 +16728,7 @@
       "additionalProperties": false
     },
     "Consent": {
-      "description": "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.",
+      "description": "Запись о выборе потребителя здравоохранения, которая разрешает или запрещает идентифицированному получателю(ам) или роли(ям) получателя выполнять одно или несколько действий в рамках заданного контекста политики для определенных целей и периодов времени.",
       "properties": {
         "resourceType": {
           "description": "This is a Consent resource",
@@ -16763,14 +16784,14 @@
           "type": "array"
         },
         "identifier": {
-          "description": "Unique identifier for this copy of the Consent Statement.",
+          "description": "Уникальный идентификатор этой копии заявления о согласии.",
           "items": {
             "$ref": "#/definitions/Identifier"
           },
           "type": "array"
         },
         "status": {
-          "description": "Indicates the current state of this consent.",
+          "description": "Указывает текущее состояние этого согласия.",
           "enum": [
             "draft",
             "proposed",
@@ -16785,22 +16806,22 @@
           "$ref": "#/definitions/Element"
         },
         "scope": {
-          "description": "A selector of the type of consent being presented: ADR, Privacy, Treatment, Research.  This list is now extensible.",
+          "description": "Селектор типа предоставляемого согласия: ADR, Privacy, Treatment, Research. Этот список теперь расширяемый.",
           "$ref": "#/definitions/CodeableConcept"
         },
         "category": {
-          "description": "A classification of the type of consents found in the statement. This element supports indexing and retrieval of consent statements.",
+          "description": "Классификация типов согласия в заявлении. Этот элемент поддерживает индексирование и извлечение заявлений о согласии.",
           "items": {
             "$ref": "#/definitions/CodeableConcept"
           },
           "type": "array"
         },
         "patient": {
-          "description": "The patient/healthcare consumer to whom this consent applies.",
+          "description": "Пациент / потребитель медицинских услуг, на которого распространяется данное согласие.",
           "$ref": "#/definitions/Reference"
         },
         "dateTime": {
-          "description": "When this  Consent was issued / created / indexed.",
+          "description": "Когда это Согласие было выдано / создано / проиндексировано.",
           "$ref": "#/definitions/dateTime"
         },
         "_dateTime": {
@@ -16808,47 +16829,47 @@
           "$ref": "#/definitions/Element"
         },
         "performer": {
-          "description": "Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.",
+          "description": "Либо Правообладатель, который является лицом, ответственным за предоставление прав, перечисленных в Директиве о согласии, либо Грантополучатель, который является лицом, ответственным за соблюдение Директивы о согласии, включая любые обязательства или ограничения в отношении разрешений и соблюдения запретов.",
           "items": {
             "$ref": "#/definitions/Reference"
           },
           "type": "array"
         },
         "organization": {
-          "description": "The organization that manages the consent, and the framework within which it is executed.",
+          "description": "Организация, которая управляет согласием, и структура, в которой оно оформляется.",
           "items": {
             "$ref": "#/definitions/Reference"
           },
           "type": "array"
         },
         "sourceAttachment": {
-          "description": "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.",
+          "description": "Источник, на котором основано это согласие. Источником может быть отсканированная оригинальная бумажная форма или ссылка на согласие, которая ссылается на такой источник, ссылка на репозиторий документов (например, XDS), в котором хранится исходный документ согласия.",
           "$ref": "#/definitions/Attachment"
         },
         "sourceReference": {
-          "description": "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.",
+          "description": "Источник, на котором основано это согласие. Источником может быть отсканированная оригинальная бумажная форма или ссылка на согласие, которая ссылается на такой источник, ссылка на репозиторий документов (например, XDS), в котором хранится исходный документ согласия.",
           "$ref": "#/definitions/Reference"
         },
         "policy": {
-          "description": "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.",
+          "description": "Ссылки на политики, включенные в эту область согласия. Политика может быть организационной, но часто определяется юрисдикцией или законом.",
           "items": {
             "$ref": "#/definitions/Consent_Policy"
           },
           "type": "array"
         },
         "policyRule": {
-          "description": "A reference to the specific base computable regulation or policy.",
+          "description": "Ссылка на конкретное базовое вычислимое регулирование или политику.",
           "$ref": "#/definitions/CodeableConcept"
         },
         "verification": {
-          "description": "Whether a treatment instruction (e.g. artificial respiration yes or no) was verified with the patient, his/her family or another authorized person.",
+          "description": "Была ли проверена инструкция по лечению (например, искусственное дыхание - да или нет) с пациентом, его / ее семьей или другим уполномоченным лицом.",
           "items": {
             "$ref": "#/definitions/Consent_Verification"
           },
           "type": "array"
         },
         "provision": {
-          "description": "An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.",
+          "description": "Исключение из основной политики этого согласия. Исключением может быть добавление или удаление прав доступа.",
           "$ref": "#/definitions/Consent_Provision"
         }
       },
@@ -16860,7 +16881,7 @@
       ]
     },
     "Consent_Policy": {
-      "description": "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.",
+      "description": "Запись о выборе потребителя здравоохранения, которая разрешает или запрещает идентифицированному получателю(ам) или роли(ям) получателя выполнять одно или несколько действий в рамках заданного контекста политики для определенных целей и периодов времени.",
       "properties": {
         "id": {
           "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
@@ -16881,7 +16902,7 @@
           "type": "array"
         },
         "authority": {
-          "description": "Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.",
+          "description": "Субъект или организация, обладающая регулирующей юрисдикцией или подотчетной за обеспечение соблюдения политик, относящихся к Директивам о согласии.",
           "$ref": "#/definitions/uri"
         },
         "_authority": {
@@ -16889,7 +16910,7 @@
           "$ref": "#/definitions/Element"
         },
         "uri": {
-          "description": "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.",
+          "description": "Ссылки на политики, включенные в эту область согласия. Политика может быть организационной, но часто определяется юрисдикцией или законом.",
           "$ref": "#/definitions/uri"
         },
         "_uri": {
@@ -16900,7 +16921,7 @@
       "additionalProperties": false
     },
     "Consent_Verification": {
-      "description": "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.",
+      "description": "Запись о выборе потребителя здравоохранения, которая разрешает или запрещает идентифицированному получателю(ам) или роли(ям) получателя выполнять одно или несколько действий в рамках заданного контекста политики для определенных целей и периодов времени.",
       "properties": {
         "id": {
           "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
@@ -16921,7 +16942,7 @@
           "type": "array"
         },
         "verified": {
-          "description": "Has the instruction been verified.",
+          "description": "Была ли инструкция проверена.",
           "$ref": "#/definitions/boolean"
         },
         "_verified": {
@@ -16929,11 +16950,11 @@
           "$ref": "#/definitions/Element"
         },
         "verifiedWith": {
-          "description": "Who verified the instruction (Patient, Relative or other Authorized Person).",
+          "description": "Кто проверил инструкцию (пациент, родственник или другое уполномоченное лицо).",
           "$ref": "#/definitions/Reference"
         },
         "verificationDate": {
-          "description": "Date verification was collected.",
+          "description": "Дата подтверждения согласия.",
           "$ref": "#/definitions/dateTime"
         },
         "_verificationDate": {
@@ -16944,7 +16965,7 @@
       "additionalProperties": false
     },
     "Consent_Provision": {
-      "description": "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.",
+      "description": "Запись о выборе потребителя здравоохранения, которая разрешает или запрещает идентифицированному получателю(ам) или роли(ям) получателя выполнять одно или несколько действий в рамках заданного контекста политики для определенных целей и периодов времени.",
       "properties": {
         "id": {
           "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
@@ -16965,7 +16986,7 @@
           "type": "array"
         },
         "type": {
-          "description": "Action  to take - permit or deny - when the rule conditions are met.  Not permitted in root rule, required in all nested rules.",
+          "description": "Действия, которые необходимо предпринять - разрешить или запретить - при выполнении условий правила. Не разрешено в корневом правиле, требуется во всех вложенных правилах.",
           "enum": [
             "deny",
             "permit"
@@ -16976,64 +16997,64 @@
           "$ref": "#/definitions/Element"
         },
         "period": {
-          "description": "The timeframe in this rule is valid.",
+          "description": "Срок действия этого правила.",
           "$ref": "#/definitions/Period"
         },
         "actor": {
-          "description": "Who or what is controlled by this rule. Use group to identify a set of actors by some property they share (e.g. \u0027admitting officers\u0027).",
+          "description": "Кто или что контролирует это правило. Используйте группу, чтобы идентифицировать набор участников по некоторому признаку, который они разделяют (например, \u0027admitting officers\u0027).",
           "items": {
             "$ref": "#/definitions/Consent_Actor"
           },
           "type": "array"
         },
         "action": {
-          "description": "Actions controlled by this Rule.",
+          "description": "Действия, контролируемые этим правилом.",
           "items": {
             "$ref": "#/definitions/CodeableConcept"
           },
           "type": "array"
         },
         "securityLabel": {
-          "description": "A security label, comprised of 0..* security label fields (Privacy tags), which define which resources are controlled by this exception.",
+          "description": "Метка безопасности, состоящая из 0 .. * полей метки безопасности (тегов конфиденциальности), которые определяют, какие ресурсы контролируются этим исключением.",
           "items": {
             "$ref": "#/definitions/Coding"
           },
           "type": "array"
         },
         "purpose": {
-          "description": "The context of the activities a user is taking - why the user is accessing the data - that are controlled by this rule.",
+          "description": "Контекст действий, которые выполняет пользователь - почему пользователь обращается к данным, - которые контролируются этим правилом.",
           "items": {
             "$ref": "#/definitions/Coding"
           },
           "type": "array"
         },
         "class": {
-          "description": "The class of information covered by this rule. The type can be a FHIR resource type, a profile on a type, or a CDA document, or some other type that indicates what sort of information the consent relates to.",
+          "description": "Класс информации, на который распространяется это правило. Тип может быть типом ресурса FHIR, профилем типа, документом CDA или каким-либо другим типом, который указывает, к какому виду информации относится согласие.",
           "items": {
             "$ref": "#/definitions/Coding"
           },
           "type": "array"
         },
         "code": {
-          "description": "If this code is found in an instance, then the rule applies.",
+          "description": "Если этот код найден в экземпляре, то применяется правило.",
           "items": {
             "$ref": "#/definitions/CodeableConcept"
           },
           "type": "array"
         },
         "dataPeriod": {
-          "description": "Clinical or Operational Relevant period of time that bounds the data controlled by this rule.",
+          "description": "Клинически релевантный или рабочий период времени, ограничивающий данные, контролируемые этим правилом.",
           "$ref": "#/definitions/Period"
         },
         "data": {
-          "description": "The resources controlled by this rule if specific resources are referenced.",
+          "description": "Ресурсы, контролируемые этим правилом, если есть ссылки на определенные ресурсы.",
           "items": {
             "$ref": "#/definitions/Consent_Data"
           },
           "type": "array"
         },
         "provision": {
-          "description": "Rules which provide exceptions to the base rule or subrules.",
+          "description": "Правила, которые предоставляют исключения из основного правила или подправил.",
           "items": {
             "$ref": "#/definitions/Consent_Provision"
           },
@@ -17043,7 +17064,7 @@
       "additionalProperties": false
     },
     "Consent_Actor": {
-      "description": "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.",
+      "description": "Запись о выборе потребителя здравоохранения, которая разрешает или запрещает идентифицированному получателю(ам) или роли(ям) получателя выполнять одно или несколько действий в рамках заданного контекста политики для определенных целей и периодов времени.",
       "properties": {
         "id": {
           "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
@@ -17064,11 +17085,11 @@
           "type": "array"
         },
         "role": {
-          "description": "How the individual is involved in the resources content that is described in the exception.",
+          "description": "Каким образом данное лицо участвует в содержании ресурсов, описанном в исключении.",
           "$ref": "#/definitions/CodeableConcept"
         },
         "reference": {
-          "description": "The resource that identifies the actor. To identify actors by type, use group to identify a set of actors by some property they share (e.g. \u0027admitting officers\u0027).",
+          "description": "Ресурс, идентифицирующий актера. Чтобы идентифицировать актеров по типу, используйте группу, чтобы идентифицировать набор актеров по некоторому общему свойству (например, \u0027admitting officers\u0027).",
           "$ref": "#/definitions/Reference"
         }
       },
@@ -17079,7 +17100,7 @@
       ]
     },
     "Consent_Data": {
-      "description": "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.",
+      "description": "Запись о выборе потребителя здравоохранения, которая разрешает или запрещает идентифицированному получателю(ам) или роли(ям) получателя выполнять одно или несколько действий в рамках заданного контекста политики для определенных целей и периодов времени.",
       "properties": {
         "id": {
           "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
@@ -17100,7 +17121,7 @@
           "type": "array"
         },
         "meaning": {
-          "description": "How the resource reference is interpreted when testing consent restrictions.",
+          "description": "Как интерпретируется ссылка на ресурс при тестировании ограничений согласия.",
           "enum": [
             "instance",
             "related",
@@ -17113,7 +17134,7 @@
           "$ref": "#/definitions/Element"
         },
         "reference": {
-          "description": "A reference to a specific resource that defines which resources are covered by this consent.",
+          "description": "Ссылка на конкретный ресурс, который определяет, на какие ресурсы распространяется это согласие.",
           "$ref": "#/definitions/Reference"
         }
       },
@@ -17447,7 +17468,7 @@
           "$ref": "#/definitions/Element"
         },
         "publicationStatus": {
-          "description": "draft | active | retired | unknown.",
+          "description": "amended | appended | cancelled | disputed | entered-in-error | executable | executed | negotiable | offered | policy | rejected | renewed | revoked | resolved | terminated.",
           "$ref": "#/definitions/code"
         },
         "_publicationStatus": {
@@ -31094,7 +31115,7 @@
           "$ref": "#/definitions/Element"
         },
         "fhirVersion": {
-          "description": "The version(s) of the FHIR specification that this ImplementationGuide targets - e.g. describes how to use. The value of this element is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 4.0.0. for this version.",
+          "description": "The version(s) of the FHIR specification that this ImplementationGuide targets - e.g. describes how to use. The value of this element is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 4.0.1. for this version.",
           "items": {
             "enum": [
               "0.01",
@@ -31117,7 +31138,8 @@
               "3.0.1",
               "3.3.0",
               "3.5.0",
-              "4.0.0"
+              "4.0.0",
+              "4.0.1"
             ]
           },
           "type": "array"
@@ -31391,7 +31413,8 @@
               "3.0.1",
               "3.3.0",
               "3.5.0",
-              "4.0.0"
+              "4.0.0",
+              "4.0.1"
             ]
           },
           "type": "array"
@@ -43403,6 +43426,10 @@
           "description": "If the parameter is a data type.",
           "$ref": "#/definitions/Dosage"
         },
+        "valueMeta": {
+          "description": "If the parameter is a data type.",
+          "$ref": "#/definitions/Meta"
+        },
         "resource": {
           "description": "If the parameter is a whole resource.",
           "$ref": "#/definitions/ResourceList"
@@ -51673,7 +51700,7 @@
           "type": "array"
         },
         "fhirVersion": {
-          "description": "The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 4.0.0. for this version.",
+          "description": "The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 4.0.1. for this version.",
           "enum": [
             "0.01",
             "0.05",
@@ -51695,7 +51722,8 @@
             "3.0.1",
             "3.3.0",
             "3.5.0",
-            "4.0.0"
+            "4.0.0",
+            "4.0.1"
           ]
         },
         "_fhirVersion": {
@@ -52772,6 +52800,10 @@
         "defaultValueDosage": {
           "description": "A value to use if there is no existing value in the source object.",
           "$ref": "#/definitions/Dosage"
+        },
+        "defaultValueMeta": {
+          "description": "A value to use if there is no existing value in the source object.",
+          "$ref": "#/definitions/Meta"
         },
         "element": {
           "description": "Optional field for this source.",
@@ -56732,6 +56764,10 @@
         "valueDosage": {
           "description": "The value of the input parameter as a basic type.",
           "$ref": "#/definitions/Dosage"
+        },
+        "valueMeta": {
+          "description": "The value of the input parameter as a basic type.",
+          "$ref": "#/definitions/Meta"
         }
       },
       "additionalProperties": false,
@@ -57054,6 +57090,10 @@
         "valueDosage": {
           "description": "The value of the Output parameter as a basic type.",
           "$ref": "#/definitions/Dosage"
+        },
+        "valueMeta": {
+          "description": "The value of the Output parameter as a basic type.",
+          "$ref": "#/definitions/Meta"
         }
       },
       "additionalProperties": false,

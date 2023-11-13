@@ -1,172 +1,164 @@
-#!/usr/bin/env python3
-
 from jsonschema.exceptions import ValidationError
+from referencing import Registry, Resource
 from jsonschema import Draft6Validator
-from typing import Union
 from pathlib import Path
+from typing import Union
 import fastjsonschema
 import json
-import glob
 import os
+import glob
 import re
 
 
-SUPPORTED_VERSIONS = [
-    'r5', 'r4', 'stu3'
-]
-
-
 class Validator:
-    """ The core of validation and error interpreting """
 
-    def __init__(self, schema_version: str) -> None:
+    # Version name : version number
+    SUPPORTED_VERSIONS = {
+        'stu3': '3.3',
+        'r4': '4.0',
+        'r5': '5.0'
+    }
+
+    def __init__(self, fhir_version: str) -> None:
         self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
-        self.schema_version = schema_version
+        self._fhir_version = fhir_version
+        self.schema_version = Validator.SUPPORTED_VERSIONS.get(self.fhir_version)
 
-        if schema_version in SUPPORTED_VERSIONS:
-            self.schema = self.base + f'/fhir.{schema_version}.schema.json'
+        if self._fhir_version in Validator.SUPPORTED_VERSIONS:
+            self.schema_name = self.base + f'/fhir.{self._fhir_version}.schema.json'
         else:
-            raise LookupError(f'Unsupported schema version: {schema_version}')
+            raise LookupError(f'Unsupported schema version: {self._fhir_version}')
 
-        self.validator = Draft6Validator(json.loads(open(self.schema, encoding="utf8").read()))
-        self.fast_validate = fastjsonschema.compile(json.load(open(self.schema, encoding="utf8")))
+        self.schema = json.loads(open(self.schema_name, encoding="utf8").read())
+        self.registry = Registry().with_resources(
+            [
+                (f"http://hl7.org/fhir/json-schema/{self.schema_version}", Resource.from_contents(self.schema))
+            ],
+        )
+
+        self.validator = Draft6Validator(self.schema, registry=self.registry)
+        self.fast_validator = fastjsonschema.compile(self.schema)
 
     @classmethod
-    def r5(cls) -> 'Validator':
-        return cls('r5')
+    def stu3(cls) -> 'Validator':
+        return cls('stu3')
 
     @classmethod
     def r4(cls) -> 'Validator':
         return cls('r4')
 
     @classmethod
-    def stu3(cls) -> 'Validator':
-        return cls('stu3')
+    def r5(cls) -> 'Validator':
+        return cls('r5')
 
-    def get_fhir_version(self) -> str:
-        return self.schema_version
+    @property
+    def fhir_version(self) -> str:
+        return self._fhir_version
 
     @staticmethod
-    def json_validate(resource: str) -> Union[dict, str]:
-        # TODO: This method is a bit overloaded. It can return dict or str
-        # for this type hint python versions >= 3.10 Union can be replaced with a pipe '|'
+    def normalize_file_name(file_path: str) -> str:
+        return re.split(r"/|\\", file_path)[-1]
+
+    @staticmethod
+    def validate_json(file: str) -> Union[dict, str]:
+        json_resource = {}
         try:
-            data = json.loads(resource)
-            return data
-        except json.JSONDecodeError as e:
-            return str(e)
-        except TypeError as e:
-            if isinstance(resource, dict):
-                return resource
-            else:
-                return str(e)
+            json_resource = json.loads(file)
+        except json.JSONDecodeError as json_error:
+            json_resource = str(json_error)
+        except TypeError as type_error:
+            json_resource = str(type_error)
+        finally:
+            return json_resource
 
-    @staticmethod
-    def normalize_filename(filename: str) -> str:
-        return re.split('/|\\\\', filename)[-1]
-
-    @staticmethod
-    def build_path_index(folder: str) -> list:
-        path_index = []
-        if folder:
-            for file in glob.iglob(folder + "**/*.json", recursive=True):
-                filename = file
-                path_index.append(filename)
-        return path_index
-
-    @staticmethod
-    def locate_schema(schema_error: ValidationError) -> list:
-        """
-            'rt' is short for resourceType
-
-            Since every sub-schema is validated against, if the fhir resourceType is valid,
-            then there will be a single schema where a resourceType error does not occur.
-
-            Below is an incrementing range from 0-n, n == the number of sub_schemas.
-            rt_error_count will increment parallel to schema_index, until the schema
-            index skips the index of the schema that did NOT throw a resourceType error.
-            That is the schema_index we want. Luckily rt_error_count will reflect the
-            schema index number we need.
-
-            If all sub-schemas throw a resourceType error, the resourceType attribute is invalid.
-            We return empty list.
-        """
-
-        located_schema = []
-        rt_error_count = 0
-
-        for schema_error in sorted(schema_error.context, key=lambda e: e.schema_path):
-            sub_schema_error = schema_error.schema_path
-            schema_index = sub_schema_error[0]
-
-            if 'resourceType' in sub_schema_error and not located_schema:
-                if rt_error_count < schema_index:
-                    located_schema.append(rt_error_count)
-                else:
-                    rt_error_count += 1
-
-        return located_schema
-
-    def resolve_validation_errors(self, results: dict) -> dict:
-        """ replaces the boolean values of invalid data in results with schema errors"""
-
-        invalid_files = [filename for filename, valid in results.items() if not valid]
-
-        for file in invalid_files:
-            del results[file]
-            filename = self.normalize_filename(file)
-            invalid_resource = json.loads(open(Path(file), encoding="utf8").read())
-
-            errors = sorted(self.validator.iter_errors(invalid_resource), key=lambda e: e.path)
-
-            for error in errors:
-                schema = self.locate_schema(error)
-
-                for sub_error in sorted(error.context, key=lambda e: e.schema_path):
-                    error_index = sub_error.schema_path[0]
-                    error_key = sub_error.schema_path[-1]
-
-                    if not schema:
-                        results.update(
-                            {filename: f"Unexpected resourceType: {invalid_resource['resourceType']}"}
-                        )
-                    # Here is where we check what error(s) occurred
-                    elif error_index == schema[0]:
-                        if filename in results:
-                            results[filename].update({error_key: sub_error.message})
-                        else:
-                            results.update({filename: {error_key: sub_error.message}})
-        return results
-
-    def fhir_validate(self, resource_path: str) -> dict:
-        """
-            fhir_validate creates a dictionary of data. filename as the key, and the
-            boolean depending on if the resource is valid
-        """
+    def file_validate(self, file_path: str, verbose: bool = False) -> dict:
         results = {}
-        if Path.is_dir(Path(resource_path)):
-            path_index = self.build_path_index(resource_path)
+        file = open(file_path).read()
+        file_name = self.normalize_file_name(file_path)
+        json_resource = self.validate_json(file)
 
-            for path in path_index:
-                results = self.update_results(path, results)
+        # if str, JSON is invalid, return json validation issues
+        if isinstance(json_resource, str):
+            results.update({file_name: json_resource})
         else:
-            results = self.update_results(resource_path, results)
+            if verbose:
+                results.update(self.verbose_validate(json_resource, file_name))
+            else:
+                results.update(self.fast_validate(json_resource, file_name))
 
-        return self.resolve_validation_errors(results)
-
-    def update_results(self, resource_location: str, results: dict) -> dict:
-        resource_validate = self.json_validate(open(resource_location, encoding="utf8").read())
-        filename = self.normalize_filename(resource_location)
-        if isinstance(resource_validate, str):
-            results.update({filename: resource_validate})
-        else:
-            try:
-                self.fast_validate(resource_validate)
-                results.update({filename: True})
-            except fastjsonschema.JsonSchemaException:
-                results.update({resource_location: False})
         return results
 
+    def dir_validate(self, directory_path: str, verbose: bool = False) -> dict:
+        results = {}
+        files = self.build_file_index(directory_path)
 
-if __name__ == "__main__":
-    pass
+        for file in files:
+            results.update(self.file_validate(file, verbose=verbose))
+
+        return results
+
+    @staticmethod
+    def build_file_index(directory_path: str) -> list:
+        files_in_dir = []
+
+        if Path.is_dir(Path(directory_path)):
+            for file in glob.iglob(directory_path + "**/*.json", recursive=True):
+                files_in_dir.append(file)
+        else:
+            raise LookupError("The path provided is not a directory")
+
+        return files_in_dir
+
+    def locate_sub_schema(self, json_resource: dict) -> list:
+        schema_refs = self.schema.get('oneOf', [])
+        schema_definitions = [ref['$ref'] for ref in schema_refs]
+        schema_index = []
+
+        if 'resourceType' in json_resource:
+            ref = f"#/definitions/{json_resource['resourceType']}"
+            if ref in schema_definitions:
+                schema_index.append(schema_definitions.index(ref))
+
+        return schema_index
+
+    def fast_validate(self, json_resource: dict, file_name: str) -> dict:
+        fast_results = {}
+
+        # Fast validation passes silently, fails loudly
+        try:
+            self.fast_validator(json_resource)
+            fast_results.update({file_name: True})
+        except fastjsonschema.JsonSchemaException:
+            fast_results.update({file_name: False})
+
+        return fast_results
+
+    @staticmethod
+    def add_error_results(results: dict, identifier: str, error_type: str, error_msg: str) -> None:
+        if identifier in results:
+            results[identifier].update({error_type: error_msg})
+        else:
+            results.update({identifier: {error_type: error_msg}})
+
+    def verbose_validate(self, json_resource: dict, identifier: str = '') -> dict:
+        verbose_results = {}
+        schema_index = self.locate_sub_schema(json_resource)
+
+        if not identifier:
+            identifier = f"{json_resource.get('resourceType', 'resourceType')}-{json_resource.get('id')}"
+
+        if schema_index:
+            # jsonschema validate returns noneType if valid, and raises ValidationError if invalid
+            try:
+                self.validator.check_schema(self.schema)
+                self.validator.validate(json_resource)
+                verbose_results.update({identifier: True})
+            except ValidationError as error:
+                for sub_error in error.context:
+                    if sub_error.schema_path[0] == schema_index[0]:
+                        error_type = sub_error.schema_path[-1]
+                        self.add_error_results(verbose_results, identifier, error_type, sub_error.message)
+        else:
+            verbose_results.update({identifier: f"Unexpected resourceType: {json_resource['resourceType']}"})
+
+        return verbose_results
