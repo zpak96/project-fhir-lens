@@ -21,6 +21,16 @@ class Validator:
     }
 
     def __init__(self, fhir_version: str) -> None:
+        """
+        Initializing the Validator class. Options for fhir version ('stu3', 'r4', 'r4b', 'r5')
+            -> See SUPPORTED_VERSIONS class var
+
+        Builds absolute path of module to locate schemas within module.
+        Uses fhir_version to determine which schema to use, and what version to add to the registry
+
+        Then instantiates both the jsonschema Draft6Validator, and the fastjsonschema Validator
+        """
+
         self.base = os.path.join(os.path.dirname(__file__), Path('schemas/'))
         self._fhir_version = fhir_version
         self.schema_version = Validator.SUPPORTED_VERSIONS.get(self.fhir_version)
@@ -62,10 +72,21 @@ class Validator:
 
     @staticmethod
     def normalize_file_name(file_path: str) -> str:
+        """ Strips the file path, returns only the file name """
         return re.split(r"/|\\", file_path)[-1]
 
     @staticmethod
     def validate_json(file: str) -> Union[dict, str]:
+        """
+        Accepts opened file object, or stringified JSON
+        Attempts to load json, excepts JSONDecodeError and TypeError
+
+        This allows rito to return json errors in output instead of raising error and leaving the user
+        to locate json errors themselves
+
+        returns json_resource: dict OR JSONDecodeError: str OR TypeError: str
+        """
+
         json_resource = {}
         try:
             json_resource = json.loads(file)
@@ -77,6 +98,17 @@ class Validator:
             return json_resource
 
     def file_validate(self, file_path: str, verbose: bool = False) -> dict:
+        """
+        Accepts file path, and option for verbose validation
+
+        Opens the file, normalizes the name, and json loads the file.
+
+        if verbose is False, use fastjsonschema and return bool
+        If verbose is True, use verbose validation and return dict with error messages
+
+        returns results: dict {file_name: bool | str}
+        """
+
         results = {}
         file = open(file_path).read()
         file_name = self.normalize_file_name(file_path)
@@ -94,6 +126,15 @@ class Validator:
         return results
 
     def dir_validate(self, directory_path: str, verbose: bool = False) -> dict:
+        """
+        Accepts path to directory, and option for verbose validation
+
+        Calls build_file_index to get list of json files within the directory
+        iterate over files and send each file to file_validate method along with verbose option
+
+        returns results: dict {file_name: bool | str}
+        """
+
         results = {}
         files = self.build_file_index(directory_path)
 
@@ -104,6 +145,15 @@ class Validator:
 
     @staticmethod
     def build_file_index(directory_path: str) -> list:
+        """
+        Accepts path to directory
+
+        Utilizes glob library to find each .json file within directory and child directories
+        append each file path to list
+
+        returns list[str]
+        """
+
         files_in_dir = []
 
         if Path.is_dir(Path(directory_path)):
@@ -115,6 +165,18 @@ class Validator:
         return files_in_dir
 
     def locate_sub_schema(self, json_resource: dict) -> list:
+        """
+        Accepts json resource or python dictionary
+
+        Accesses the schema definitions sections and builds an index of all sub-schema references
+        Accesses the resourceType field within the json resource, and builds a str in the format of a schema ref
+        Check to see if that calculated schema ref exists in the sub-schema reference index
+        If it does, append the index of that schema to schema_index and return it
+        If not, return empty list
+
+        returns list[int] OR []
+        """
+
         schema_refs = self.schema.get('oneOf', [])
         schema_definitions = [ref['$ref'] for ref in schema_refs]
         schema_index = []
@@ -127,6 +189,13 @@ class Validator:
         return schema_index
 
     def fast_validate(self, json_resource: dict, file_name: str) -> dict:
+        """
+        Accepts json resource or python dict, and name of file (key for results)
+        Uses fastjsonschema validator
+
+        returns results: dict {file_name: bool}
+        """
+
         fast_results = {}
 
         # Fast validation passes silently, fails loudly
@@ -140,12 +209,29 @@ class Validator:
 
     @staticmethod
     def add_error_results(results: dict, identifier: str, error_type: str, error_msg: str) -> None:
+        """ A method for easy adding of results to dict """
+
         if identifier in results:
             results[identifier].update({error_type: error_msg})
         else:
             results.update({identifier: {error_type: error_msg}})
 
     def verbose_validate(self, json_resource: dict, identifier: str = '') -> dict:
+        """
+        Accepts json resource or python object, and identifier (key for results)
+
+        Gets index of sub-schema to check against by calling locate_sub_schema
+        If identifier is not provided, calculate one
+        If schema index doesn't exist, resourceType is invalid,
+        If it exists use jsonschema validator and except ValidationError
+        If resource is valid, return True
+
+        Use schema_index to locate correct schema errors
+        update results accordingly
+
+        returns results: dict {identifier: bool | {error_type: str: error_msg: str}}
+        """
+
         verbose_results = {}
         schema_index = self.locate_sub_schema(json_resource)
 
@@ -155,7 +241,6 @@ class Validator:
         if schema_index:
             # jsonschema validate returns noneType if valid, and raises ValidationError if invalid
             try:
-                self.validator.check_schema(self.schema)
                 self.validator.validate(json_resource)
                 verbose_results.update({identifier: True})
             except ValidationError as error:
