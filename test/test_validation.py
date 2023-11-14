@@ -6,7 +6,14 @@ import os
 
 
 LOGGER = logging.getLogger(__name__)
-TEST_VALIDATORS = [rito.Validator.r5(), rito.Validator.r4(), rito.Validator.stu3()]
+
+TEST_VALIDATORS = [
+    rito.Validator.stu3(),
+    rito.Validator.r4(),
+    rito.Validator.r4b(),
+    rito.Validator.r5()
+]
+
 TEST_RESOURCES = ['patient', 'organization', 'observation']
 TEST_DATA_BASE_PATH = os.path.join(Path(__file__).resolve().parent, Path('data'))
 

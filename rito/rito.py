@@ -16,6 +16,7 @@ class Validator:
     SUPPORTED_VERSIONS = {
         'stu3': '3.3',
         'r4': '4.0',
+        'r4b': '4.3',
         'r5': '5.0'
     }
 
@@ -46,6 +47,10 @@ class Validator:
     @classmethod
     def r4(cls) -> 'Validator':
         return cls('r4')
+
+    @classmethod
+    def r4b(cls) -> 'Validator':
+        return cls('r4b')
 
     @classmethod
     def r5(cls) -> 'Validator':
